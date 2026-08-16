@@ -9,14 +9,67 @@ import ControlCenterMenu from "~/components/menus/ControlCenterMenu";
 import NotificationCenter from "~/components/NotificationCenter";
 import { useAudioContext } from "~/context/AudioContext";
 import IOSAppIcon from "~/components/mobile/IOSAppIcon";
+import SiriVoiceAssistant from "~/components/SiriVoiceAssistant";
 
 export default function Mobile(props: MacActions) {
   const [activeApp, setActiveApp] = useState<string | null>(null);
   const [showControlCenter, setShowControlCenter] = useState(false);
   const [showNotificationCenter, setShowNotificationCenter] = useState(false);
 
+  const [showPermissionModal, setShowPermissionModal] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("mobile_permissions_handled") !== "true";
+    } catch {
+      return true;
+    }
+  });
+
+  const requestPermissions = async () => {
+    try {
+      // 1. Microphone Request
+      if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+          });
+          stream.getTracks().forEach((t) => t.stop());
+        } catch (err) {
+          console.warn("Microphone permission error:", err);
+        }
+      }
+
+      // 2. Geolocation Request
+      if (typeof navigator !== "undefined" && "geolocation" in navigator) {
+        try {
+          navigator.geolocation.getCurrentPosition(
+            () => {},
+            (err) => console.warn("Location permission error:", err),
+            { timeout: 10000, enableHighAccuracy: true }
+          );
+        } catch (err) {
+          console.warn("Geolocation error:", err);
+        }
+      }
+    } finally {
+      try {
+        localStorage.setItem("mobile_permissions_handled", "true");
+      } catch { /* empty */ }
+      setShowPermissionModal(false);
+    }
+  };
+
+  const handleDenyPermissions = () => {
+    try {
+      localStorage.setItem("mobile_permissions_handled", "true");
+    } catch { /* empty */ }
+    setShowPermissionModal(false);
+  };
+
   const statusBarLeftRef = useRef<HTMLDivElement>(null);
   const statusBarRightRef = useRef<HTMLDivElement>(null);
+
+  const touchStartYLeftRef = useRef<number | null>(null);
+  const touchStartYRightRef = useRef<number | null>(null);
 
   const { audioState, controls } = useAudioContext();
 
@@ -58,6 +111,39 @@ export default function Mobile(props: MacActions) {
     setActiveApp(null);
   };
 
+  // Listen to Siri & Voice Assistant events on Mobile
+  React.useEffect(() => {
+    const handleOpenApp = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const appId = customEvent.detail?.id;
+      if (appId) {
+        const app = apps.find((a) => a.id === appId);
+        if (app && app.link && !app.content) {
+          window.open(app.link, "_blank");
+        } else {
+          setActiveApp(appId);
+        }
+      }
+    };
+
+    const handleOpenSiri = () => {
+      setActiveApp("siri");
+    };
+
+    const handleCloseSiri = () => {
+      setActiveApp(null);
+    };
+
+    window.addEventListener("desktop:openApp", handleOpenApp);
+    window.addEventListener("siri:open", handleOpenSiri);
+    window.addEventListener("siri:close", handleCloseSiri);
+    return () => {
+      window.removeEventListener("desktop:openApp", handleOpenApp);
+      window.removeEventListener("siri:open", handleOpenSiri);
+      window.removeEventListener("siri:close", handleCloseSiri);
+    };
+  }, []);
+
   const bgStyle: React.CSSProperties = {
     backgroundImage: isVideoWallpaper ? "none" : `url(${currentBgUrl})`,
     backgroundSize: "cover",
@@ -67,6 +153,9 @@ export default function Mobile(props: MacActions) {
   };
 
   const dockApps = ["facetime", "messages", "safari", "music"];
+
+  const currentAppObj = activeApp ? apps.find((a) => a.id === activeApp) : null;
+  const currentAppTitle = currentAppObj ? (currentAppObj.mobileTitle || currentAppObj.title) : "";
 
   return (
     <div className="size-full overflow-hidden relative" style={bgStyle}>
@@ -82,7 +171,7 @@ export default function Mobile(props: MacActions) {
       )}
       <StatusBar 
         isAppOpen={activeApp !== null} 
-        appTitle={activeApp ? (activeApp === 'finder' ? 'Files' : apps.find(a => a.id === activeApp)?.title) : ""} 
+        appTitle={currentAppTitle} 
         onLeftTap={() => setShowNotificationCenter(!showNotificationCenter)}
         onRightTap={() => setShowControlCenter(!showControlCenter)}
       />
@@ -92,32 +181,32 @@ export default function Mobile(props: MacActions) {
         ref={statusBarLeftRef}
         className="fixed top-0 left-0 w-1/2 h-12 z-[9990] pointer-events-auto"
         onTouchStart={(e) => {
-          const touch = e.touches[0];
-          (e.target as any).startY = touch.clientY;
+          touchStartYLeftRef.current = e.touches[0].clientY;
         }}
         onTouchMove={(e) => {
-          const touch = e.touches[0];
-          const startY = (e.target as any).startY;
-          if (startY !== undefined && touch.clientY - startY > 30) {
+          if (touchStartYLeftRef.current !== null && e.touches[0].clientY - touchStartYLeftRef.current > 30) {
             setShowNotificationCenter(true);
-            (e.target as any).startY = undefined;
+            touchStartYLeftRef.current = null;
           }
+        }}
+        onTouchEnd={() => {
+          touchStartYLeftRef.current = null;
         }}
       />
       <div
         ref={statusBarRightRef}
         className="fixed top-0 right-0 w-1/2 h-12 z-[9990] pointer-events-auto"
         onTouchStart={(e) => {
-          const touch = e.touches[0];
-          (e.target as any).startY = touch.clientY;
+          touchStartYRightRef.current = e.touches[0].clientY;
         }}
         onTouchMove={(e) => {
-          const touch = e.touches[0];
-          const startY = (e.target as any).startY;
-          if (startY !== undefined && touch.clientY - startY > 30) {
+          if (touchStartYRightRef.current !== null && e.touches[0].clientY - touchStartYRightRef.current > 30) {
             setShowControlCenter(true);
-            (e.target as any).startY = undefined;
+            touchStartYRightRef.current = null;
           }
+        }}
+        onTouchEnd={() => {
+          touchStartYRightRef.current = null;
         }}
       />
 
@@ -155,7 +244,7 @@ export default function Mobile(props: MacActions) {
              <div className="flex-1 px-5 pt-6">
                 <div className="grid grid-cols-4 gap-x-3 gap-y-7">
                   {apps
-                    .filter((app) => (app.desktop || ["github", "leetcode", "codechef", "codeyx"].includes(app.id)) && !dockApps.includes(app.id) && app.id !== "vscode")
+                    .filter((app) => !dockApps.includes(app.id) && !app.hideOnMobile)
                     .map((app) => (
                     <div 
                       key={app.id} 
@@ -163,10 +252,10 @@ export default function Mobile(props: MacActions) {
                       onClick={() => openApp(app.id)}
                     >
                        <div className="w-[60px] h-[60px] rounded-[14px] overflow-hidden shadow-md flex-shrink-0">
-                         <IOSAppIcon appId={app.id} desktopImg={`/${app.id === 'finder' ? 'img/icons/folder-generic.png' : app.img}`} />
+                         <IOSAppIcon appId={app.id} desktopImg={`/${app.mobileImg || app.img}`} />
                        </div>
                        <span className="text-white text-[11px] font-medium tracking-wide drop-shadow-md text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-0.5">
-                         {app.id === 'finder' ? 'Files' : app.id === 'system-settings' ? 'Settings' : app.title}
+                         {app.mobileTitle || app.title}
                        </span>
                     </div>
                   ))}
@@ -179,50 +268,139 @@ export default function Mobile(props: MacActions) {
         )}
       </AnimatePresence>
 
-      {/* Active App Window */}
+      {/* Active App Window — Native iOS Layout */}
       <AnimatePresence>
         {activeApp && (
           <motion.div
             key="activeApp"
-            initial={{ y: "100%", opacity: 0.5 }}
+            initial={{ y: "100%", opacity: 0.8 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "100%", opacity: 0.5 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="absolute inset-0 z-40 bg-white/85 dark:bg-[#1c1c1e]/85 backdrop-blur-2xl"
+            exit={{ y: "100%", opacity: 0.8 }}
+            transition={{ type: "spring", damping: 28, stiffness: 260 }}
+            className="absolute inset-0 z-40 bg-[#121318] text-white flex flex-col overflow-hidden"
           >
-             {/* Render the active app's content inside a mobile container */}
-             <div className="w-full h-full pt-12 relative overflow-hidden flex flex-col">
-               <div className="flex-1 overflow-y-auto no-scrollbar relative">
-                 {(() => {
-                    const app = apps.find(a => a.id === activeApp);
-                    if (!app) return null;
-                    return app.content;
-                 })()}
-               </div>
+            {/* Top iOS Navigation Bar (Dark glass backdrop for status bar contrast) */}
+            <div className="pt-12 bg-[#181a22]/95 border-b border-white/10 shrink-0 backdrop-blur-xl z-30 shadow-md">
+              <div className="h-11 px-3.5 flex items-center justify-between">
+                {/* Back Button */}
+                <button
+                  onClick={closeApp}
+                  onTouchEnd={closeApp}
+                  className="flex items-center gap-1 text-blue-400 font-semibold text-sm active:opacity-60 transition-opacity"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                  <span>Back</span>
+                </button>
 
-               {/* Floating Close Button for Mobile Apps */}
-               <button 
-                 onClick={closeApp}
-                 onTouchEnd={closeApp}
-                 className="absolute top-[60px] right-4 z-50 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-md border border-white/10 active:scale-95 transition-all pointer-events-auto shadow-md text-xs font-bold"
-                 title="Close App"
-               >
-                 ✕
-               </button>
+                {/* Center Title & Icon */}
+                <div className="flex items-center gap-2 max-w-[55%] truncate">
+                  {currentAppObj && (
+                    <div className="w-5 h-5 rounded-md overflow-hidden flex-shrink-0 shadow-xs border border-white/10">
+                      <IOSAppIcon appId={currentAppObj.id} desktopImg={`/${currentAppObj.mobileImg || currentAppObj.img}`} />
+                    </div>
+                  )}
+                  <span className="text-xs sm:text-sm font-bold text-white truncate">
+                    {currentAppTitle}
+                  </span>
+                </div>
 
-               {/* Home Indicator line at the bottom to go back */}
-               <div 
-                 className="absolute bottom-1 left-0 right-0 h-8 flex items-end justify-center pb-2 cursor-pointer z-50 bg-gradient-to-t from-white/80 dark:from-black/80 to-transparent" 
-                 onClick={closeApp}
-                 onTouchEnd={closeApp}
-               >
-                 <div className="w-1/3 h-1.5 bg-black dark:bg-white rounded-full opacity-80 hover:opacity-100 transition-opacity" />
-               </div>
-             </div>
+                {/* Done Button */}
+                <button
+                  onClick={closeApp}
+                  onTouchEnd={closeApp}
+                  className="bg-white/15 hover:bg-white/25 text-white text-xs font-semibold px-3 py-1 rounded-full active:scale-95 transition-all border border-white/10"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+
+            {/* App Content Viewport */}
+            <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col bg-[#12141a]">
+              {(() => {
+                const app = apps.find((a) => a.id === activeApp);
+                if (!app || !app.content) return null;
+                return React.cloneElement(app.content as React.ReactElement, {
+                  closeSiri: closeApp,
+                  isMobile: true,
+                });
+              })()}
+            </div>
+
+            {/* iOS Home Indicator Bar */}
+            <div
+              className="h-6 w-full flex items-center justify-center cursor-pointer z-50 shrink-0 bg-[#161822] border-t border-white/10"
+              onClick={closeApp}
+              onTouchEnd={closeApp}
+            >
+              <div className="w-32 h-1 bg-white/60 rounded-full opacity-80 hover:opacity-100 transition-opacity" />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* iOS System Permission Modal for Microphone and Location */}
+      <AnimatePresence>
+        {showPermissionModal && (
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-5 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 10 }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
+              className="w-[285px] rounded-[18px] bg-[#1e1f25]/95 border border-white/15 text-white backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col items-center pt-5 text-center select-none"
+            >
+              {/* Permission Icons */}
+              <div className="flex items-center justify-center gap-2.5 mb-3">
+                <div className="w-10 h-10 rounded-[11px] bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-md border border-white/10">
+                  <img src="/img/icons/siri.png" alt="Siri" className="w-7 h-7 object-contain" />
+                </div>
+                <div className="w-10 h-10 rounded-[11px] bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center shadow-md border border-white/10">
+                  <img src="/img/icons/maps.png" alt="Maps" className="w-7 h-7 object-contain" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-[14.5px] font-semibold text-white px-4 leading-snug">
+                “Lalit Portfolio” Would Like to Access Your Microphone & Location
+              </h3>
+
+              {/* Message */}
+              <p className="text-[11.5px] text-white/70 px-4 mt-2 leading-relaxed">
+                Used for hands-free Siri voice interaction, live Maps navigation, and local Weather widgets.
+              </p>
+
+              {/* iOS Action Buttons */}
+              <div className="w-full mt-4 border-t border-white/15 grid grid-cols-2 text-[14px] divide-x divide-white/15">
+                <button
+                  onClick={handleDenyPermissions}
+                  onTouchEnd={handleDenyPermissions}
+                  className="py-3 text-blue-400 hover:bg-white/5 active:bg-white/15 transition-colors font-normal"
+                >
+                  Don’t Allow
+                </button>
+                <button
+                  onClick={requestPermissions}
+                  onTouchEnd={requestPermissions}
+                  className="py-3 text-blue-400 hover:bg-white/5 active:bg-white/15 transition-colors font-semibold"
+                >
+                  Allow
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Global Hands-Free Siri Voice Assistant for Mobile */}
+      <SiriVoiceAssistant
+        isSiriOpen={activeApp === "siri"}
+        openSiri={() => openApp("siri")}
+      />
+
     </div>
   );
 }
+

@@ -600,154 +600,168 @@ export default function Spotify() {
 
       {/* Mobile Bottom Tab Navigation */}
       {isMobile && (
-        <div className="h-[54px] bg-[#0c0d12] border-t border-[#1c1e28] flex items-center justify-around z-20 flex-shrink-0">
+        <div className="h-[44px] bg-[#090a0e] border-t border-[#1c1e28] flex items-center justify-around z-20 flex-shrink-0">
           <button
             onClick={() => setActiveTab("home")}
-            className={`flex flex-col items-center gap-1 text-[10px] font-bold ${
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
               activeTab === "home" ? "text-cyan-400" : "text-[#8e92a4]"
             }`}
           >
-            <span className="i-ph:house-fill text-lg" />
+            <span className="i-ph:house-fill text-base" />
             <span>Home</span>
           </button>
           <button
             onClick={() => setActiveTab("search")}
-            className={`flex flex-col items-center gap-1 text-[10px] font-bold ${
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
               activeTab === "search" ? "text-cyan-400" : "text-[#8e92a4]"
             }`}
           >
-            <span className="i-ph:magnifying-glass-bold text-lg" />
+            <span className="i-ph:magnifying-glass-bold text-base" />
             <span>Search</span>
           </button>
           <button
             onClick={() => {
               setActiveTab("lyrics");
             }}
-            className={`flex flex-col items-center gap-1 text-[10px] font-bold ${
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
               activeTab === "lyrics" ? "text-cyan-400" : "text-[#8e92a4]"
             }`}
           >
-            <span className="i-ph:microphone-stage-bold text-lg" />
+            <span className="i-ph:microphone-stage-bold text-base" />
             <span>Visuals</span>
           </button>
         </div>
       )}
 
-      {/* Bottom Custom Playback Bar */}
+      {/* Floating iOS Mini Player Card */}
       {currentSong && (
-        <div className="h-[90px] py-2 bg-[#0c0d12] border-t border-[#1d1f27] flex items-center px-4 justify-between gap-4 z-20 flex-shrink-0 shadow-2xl">
-          {/* Left Details */}
-          <div className="flex items-center gap-3 w-1/4 min-w-[150px] sm:min-w-[180px]">
-            <div className="relative w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden border border-[#20222a] shadow-inner">
-              <img
-                src={currentSong.coverUrl}
-                alt={currentSong.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-white truncate hover:underline cursor-pointer">
-                {currentSong.title}
+        <div className={isMobile ? "px-2.5 py-1.5 z-20 flex-shrink-0 bg-[#07080c]" : ""}>
+          <div
+            className={`bg-[#1c1e2a] border border-[#2c2f40] shadow-2xl flex items-center justify-between gap-3 z-20 transition-all ${
+              isMobile
+                ? "h-[54px] rounded-2xl px-3 relative overflow-hidden"
+                : "h-[90px] py-2 px-4 border-t border-x-0 border-b-0 rounded-none border-[#1d1f27]"
+            }`}
+          >
+            {/* Top Progress Micro Line for Mobile */}
+            {isMobile && (
+              <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-white/10">
+                <div
+                  className="h-full bg-cyan-400 transition-all duration-200"
+                  style={{ width: `${((currentTime / (duration || 30)) * 100) || 0}%` }}
+                />
               </div>
-              <div className="text-[11px] text-slate-400 truncate">
-                {currentSong.artist}
+            )}
+
+            {/* Left Details */}
+            <div className="flex items-center gap-3 min-w-0 flex-1 sm:w-1/4 sm:min-w-[180px]">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-xl overflow-hidden border border-white/10 shadow-inner">
+                <img
+                  src={currentSong.coverUrl}
+                  alt={currentSong.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-bold text-white truncate hover:underline cursor-pointer">
+                  {currentSong.title}
+                </div>
+                <div className="text-[10px] text-slate-400 truncate">
+                  {currentSong.artist}
+                </div>
               </div>
             </div>
-            <button
-              onClick={() => toggleLike(currentSong.id)}
-              className={`text-sm hover:scale-115 transition-transform ml-1 ${
-                likedTracks.includes(currentSong.id) ? "text-pink-500" : "text-slate-500 hover:text-white"
-              }`}
-            >
-              ♥
-            </button>
+
+            {/* Playback Controls */}
+            <div className="flex items-center gap-2 sm:flex-col sm:max-w-xl sm:w-full">
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={handlePrev}
+                  className="text-slate-400 hover:text-white p-1 transition-colors"
+                  title="Previous Track"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                </button>
+
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="w-8 h-8 rounded-full bg-cyan-400 text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-md shadow-cyan-400/30"
+                  title={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? (
+                    <svg className="w-4 h-4 fill-black" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                  ) : (
+                    <svg className="w-4 h-4 fill-black ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleNext}
+                  className="text-slate-400 hover:text-white p-1 transition-colors"
+                  title="Next Track"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                </button>
+              </div>
+
+              {!isMobile && (
+                <div className="w-full flex items-center gap-2">
+                  <span className="text-[10px] font-semibold text-slate-500 font-mono w-7 text-right">
+                    {formatDeezerDuration(currentTime)}
+                  </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max={duration || 30}
+                    step="0.1"
+                    value={currentTime}
+                    onChange={handleProgressChange}
+                    className="flex-1 h-1 rounded-full appearance-none bg-[#20222a] accent-cyan-400 cursor-pointer focus:outline-none"
+                    style={{
+                      background: `linear-gradient(to right, #22d3ee 0%, #22d3ee ${(currentTime / (duration || 30)) * 100}%, #20222a ${(currentTime / (duration || 30)) * 100}%, #20222a 100%)`
+                    }}
+                  />
+                  <span className="text-[10px] font-semibold text-slate-500 font-mono w-7">
+                    {formatDeezerDuration(duration || 30)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Right Volume Controls (Desktop Only) */}
+            {!isMobile && (
+              <div className="w-1/4 min-w-[200px] flex items-center justify-end gap-2.5">
+                <a
+                  href={currentSong.externalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-cyan-400 hover:bg-cyan-500 text-black font-extrabold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1 shadow-md shadow-cyan-400/20 active:scale-95 mr-1"
+                >
+                  <span>Play Full</span>
+                  <span>↗</span>
+                </a>
+
+                <button
+                  onClick={() => setVolume((v) => (v === 0 ? 80 : 0))}
+                  className="text-slate-400 hover:text-cyan-400 transition-colors"
+                  title="Mute/Unmute"
+                >
+                  <span className={volume === 0 ? "i-ph:speaker-slash-fill text-base block" : volume < 50 ? "i-ph:speaker-low-fill text-base block" : "i-ph:speaker-high-fill text-base block"} />
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={volume}
+                  onChange={(e) => setVolume(parseInt(e.target.value, 10))}
+                  className="w-16 sm:w-20 h-1 rounded-full appearance-none bg-[#20222a] accent-cyan-400 cursor-pointer focus:outline-none"
+                  style={{
+                    background: `linear-gradient(to right, #22d3ee 0%, #22d3ee ${volume}%, #20222a ${volume}%, #20222a 100%)`
+                  }}
+                />
+              </div>
+            )}
           </div>
-
-          {/* Center Playback Control & Progress */}
-          <div className="flex-1 max-w-xl flex flex-col items-center gap-1.5">
-            {/* Control Buttons */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handlePrev}
-                className="text-slate-400 hover:text-white transition-colors"
-                title="Previous Track"
-              >
-                <span className="i-ph:skip-back-fill text-lg block" />
-              </button>
-
-              <button
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="w-8 h-8 rounded-full bg-cyan-400 text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-cyan-400/20"
-                title={isPlaying ? "Pause" : "Play"}
-              >
-                <span className={isPlaying ? "i-ph:pause-fill text-sm block" : "i-ph:play-fill text-sm block ml-0.5"} />
-              </button>
-
-              <button
-                onClick={handleNext}
-                className="text-slate-400 hover:text-white transition-colors"
-                title="Next Track"
-              >
-                <span className="i-ph:skip-forward-fill text-lg block" />
-              </button>
-            </div>
-
-            {/* Slider Progress Bar */}
-            <div className="w-full flex items-center gap-2">
-              <span className="text-[10px] font-semibold text-slate-500 font-mono w-7 text-right">
-                {formatDeezerDuration(currentTime)}
-              </span>
-              <input
-                type="range"
-                min="0"
-                max={duration || 30}
-                step="0.1"
-                value={currentTime}
-                onChange={handleProgressChange}
-                className="flex-1 h-1 rounded-full appearance-none bg-[#20222a] accent-cyan-400 cursor-pointer focus:outline-none"
-                style={{
-                  background: `linear-gradient(to right, #22d3ee 0%, #22d3ee ${(currentTime / (duration || 30)) * 100}%, #20222a ${(currentTime / (duration || 30)) * 100}%, #20222a 100%)`
-                }}
-              />
-              <span className="text-[10px] font-semibold text-slate-500 font-mono w-7">
-                {formatDeezerDuration(duration || 30)}
-              </span>
-            </div>
-          </div>
-
-          {/* Right Volume / Mute Controls */}
-          {!isMobile && (
-            <div className="w-1/4 min-w-[200px] flex items-center justify-end gap-2.5">
-              <a
-                href={currentSong.externalUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="px-3 py-1.5 rounded-xl bg-cyan-400 hover:bg-cyan-500 text-black font-extrabold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1 shadow-md shadow-cyan-400/20 active:scale-95 mr-1"
-              >
-                <span>Play Full</span>
-                <span>↗</span>
-              </a>
-
-              <button
-                onClick={() => setVolume((v) => (v === 0 ? 80 : 0))}
-                className="text-slate-400 hover:text-cyan-400 transition-colors"
-                title="Mute/Unmute"
-              >
-                <span className={volume === 0 ? "i-ph:speaker-slash-fill text-base block" : volume < 50 ? "i-ph:speaker-low-fill text-base block" : "i-ph:speaker-high-fill text-base block"} />
-              </button>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={volume}
-                onChange={(e) => setVolume(parseInt(e.target.value, 10))}
-                className="w-16 sm:w-20 h-1 rounded-full appearance-none bg-[#20222a] accent-cyan-400 cursor-pointer focus:outline-none"
-                style={{
-                  background: `linear-gradient(to right, #22d3ee 0%, #22d3ee ${volume}%, #20222a ${volume}%, #20222a 100%)`
-                }}
-              />
-            </div>
-          )}
         </div>
       )}
     </div>

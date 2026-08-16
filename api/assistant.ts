@@ -1,40 +1,42 @@
 
-const SYSTEM_PROMPT = `You are Siri, the smart, warm, witty, and articulate personal AI voice assistant for Lalit Modi (Lalit Kumar)'s macOS portfolio.
-You must answer questions dynamically, authentically, and conversationally based on the real data from Lalit's Know Me / About Me portfolio context. Never hallucinate personal details.
+const SYSTEM_PROMPT = `You are a real-time conversational AI voice assistant on Lalit Modi's portfolio website.
 
-CRITICAL INSTRUCTIONS:
-1. STRICT MULTILINGUAL LANGUAGE MIRRORING (MANDATORY):
-   - GUJARATI: If the user asks in Gujarati (e.g. "Lalit Modi kon chhe?", "Shu skills chhe?", "Projects batavo", "LeetCode par ketla question karya?", "Kem chho?"), YOU MUST REPLY IN NATURAL, CONVERSATIONAL GUJARATI (in Latin script)!
-   - HINDI / HINGLISH: If the user asks in Hindi or Hinglish (e.g. "Lalit Modi ke baare me batao", "Kaun hai Lalit", "Kya skills hain", "LeetCode pe kitne question kiye", "Projects dikhao"), YOU MUST REPLY IN NATURAL, CONVERSATIONAL HINDI/HINGLISH (in Latin script)!
-   - ENGLISH: If the user asks in English (e.g. "Tell me about Lalit Modi", "What are his projects?", "Show me his LeetCode stats"), YOU MUST REPLY IN NATURAL, CRISP ENGLISH!
-   - OTHER LANGUAGES (Rajasthani/Marwari, etc.): Always mirror the exact language and dialect used by the user!
-2. DYNAMIC & CONVERSATIONAL (NO STATIC REPETITIVE INTROS):
-   - NEVER repeat rigid boilerplate intros across different questions.
-   - Directly and specifically answer what the user asked with real numbers and details (e.g. 8.34 CGPA at Parul University, 349+ LeetCode problems solved, Codeyx CP analytics platform, Make Appointment Easy, Mini ERP, Java Core Banking, WhatsApp: +91 7878065017).
-3. JSON FORMAT REQUIREMENT:
-   Return ONLY a valid JSON object:
+CORE PRINCIPLES & GUIDELINES:
+1. GENERATE EVERY RESPONSE DYNAMICALLY from the user's actual message. NEVER return a predefined, hardcoded, or static answer.
+2. DO NOT ASSUME THAT EVERY QUESTION IS ABOUT LALIT MODI.
+3. ONLY USE LALIT'S PORTFOLIO CONTEXT WHEN THE USER'S QUESTION IS ACTUALLY ABOUT LALIT OR HIS PORTFOLIO.
+4. FOR GENERAL QUESTIONS (e.g. science, geography, programming, facts, math, philosophy), answer using your broad AI knowledge.
+5. FOR CASUAL, RANDOM, FUNNY, OR UNRELATED MESSAGES (e.g. "kya kar rahi ho", "who are you", "tell me a joke", "how's the weather"), respond naturally and wittily to the actual message.
+6. NEVER MODIFY THE USER'S QUESTION INTO A LALIT-RELATED QUESTION.
+7. NEVER START RESPONSES WITH rigid templates like: "Regarding your question, Lalit Modi is..." or "Lalit Modi ke baare me:".
+8. ONLY MENTION LALIT WHEN RELEVANT. Use the portfolio context as additional reference knowledge, not as the default topic.
+9. MULTILINGUAL MIRRORING: Always reply in the exact language & script/transliteration used by the user (Gujarati, Hindi, Hinglish, English, Marwari, etc.).
+
+JSON FORMAT REQUIREMENT:
+Return ONLY a valid JSON object:
 {
   "intent": "string",
-  "response": "2-3 short, warm, and natural conversational sentences suitable for speech synthesis in the user's language",
+  "response": "2-3 short, natural, conversational sentences suitable for speech synthesis in the user's language",
   "action": null | { "type": "open_app" | "navigate" | "open_url" | "download_resume" | "toggle_dark" | "play_music" | "stop_music" | "close_siri", "target": "string (optional)" },
   "modelUsed": "string"
 }
-4. Predefined action triggers:
-   - "open_app" (targets: "bear", "safari", "vscode", "terminal", "facetime", "typora", "music", "spotify", "calculator", "system-settings", "notes", "maps", "messages", "clock", "mail", "app-store", "finder", "launchpad")
-   - "open_url" (targets: "https://github.com/LalitModi90", "https://codeyx-web.vercel.app/", "https://leetcode.com/u/LalitModi90/", "https://makeappointmenteasy-user-web.vercel.app/", "https://mini-erp-crm-portal-frontend.vercel.app/", "https://www.linkedin.com/in/lalit-modi-874631302/")
-   - "download_resume" (target: "/resume.pdf")
-   - "toggle_dark"
-   - "play_music"
-   - "stop_music"
-   - "close_siri"`;
+
+Predefined action triggers when relevant:
+- "open_app" (targets: "bear", "safari", "vscode", "terminal", "facetime", "typora", "music", "spotify", "calculator", "system-settings", "notes", "maps", "messages", "clock", "mail", "app-store", "finder", "launchpad")
+- "open_url" (targets: "https://github.com/LalitModi90", "https://codeyx-web.vercel.app/", "https://leetcode.com/u/LalitModi90/", "https://makeappointmenteasy-user-web.vercel.app/", "https://mini-erp-crm-portal-frontend.vercel.app/", "https://www.linkedin.com/in/lalit-modi-874631302/")
+- "download_resume" (target: "/resume.pdf")
+- "toggle_dark"
+- "play_music"
+- "stop_music"
+- "close_siri"`;
 
 async function callGemini(apiKey: string, prompt: string, history: any[], contextStr: string): Promise<any> {
   const contents: any[] = [];
 
-  // Add system instruction as premier context
+  // Add system instruction, injecting portfolio context only if present
   contents.push({
     role: "user",
-    parts: [{ text: `${SYSTEM_PROMPT}\n\nPortfolio Context:\n${contextStr}` }]
+    parts: [{ text: `${SYSTEM_PROMPT}${contextStr ? `\n\nPortfolio Context:\n${contextStr}` : ""}` }]
   });
   contents.push({
     role: "model",
@@ -65,7 +67,7 @@ async function callGemini(apiKey: string, prompt: string, history: any[], contex
       contents,
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: 600,
+        maxOutputTokens: 150,
         responseMimeType: "application/json"
       }
     })
@@ -86,7 +88,7 @@ async function callGemini(apiKey: string, prompt: string, history: any[], contex
 
 async function callOpenAI(apiKey: string, prompt: string, history: any[], contextStr: string): Promise<any> {
   const messages: any[] = [
-    { role: "system", content: `${SYSTEM_PROMPT}\n\nPortfolio Context:\n${contextStr}` }
+    { role: "system", content: `${SYSTEM_PROMPT}${contextStr ? `\n\nPortfolio Context:\n${contextStr}` : ""}` }
   ];
 
   if (Array.isArray(history)) {
@@ -111,7 +113,7 @@ async function callOpenAI(apiKey: string, prompt: string, history: any[], contex
       messages,
       response_format: { type: "json_object" },
       temperature: 0.2,
-      max_tokens: 600
+      max_tokens: 150
     })
   });
 
@@ -158,23 +160,26 @@ function isRateLimited(clientIp: string): boolean {
 }
 
 export default async function handler(req: any, res: any) {
-  // Production-grade CORS Configuration (Disallow credentials when wildcard origin is set)
+  // CORS Headers
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
-  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+  );
 
   if (req.method === "OPTIONS") {
-    res.status(204).end();
+    res.status(200).end();
     return;
   }
 
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed. Only POST is accepted." });
+    res.status(405).json({ error: "Method not allowed. Use POST." });
     return;
   }
 
-  // Rate Limiting Protection
+  // IP Rate limiting
   const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown_client";
   if (isRateLimited(clientIp)) {
     res.status(429).json({
@@ -213,6 +218,13 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
+    // Classify if the query is specifically asking about Lalit or his portfolio
+    const qLower = sanitizedPrompt.toLowerCase().trim();
+    const isLalitQuestion =
+      /\b(lalit|modi|lalitkumar|resume|cv|portfolio|projects|codeyx|leetcode|codechef|skills|parul|education|contact|hire|about you|who are you)\b/i.test(
+        qLower
+      );
+
     // Sanitize and bound history array
     const sanitizedHistory = Array.isArray(history)
       ? history
@@ -224,13 +236,15 @@ export default async function handler(req: any, res: any) {
           }))
       : [];
 
-    // Bounded context serialization (max 25KB)
-    let contextStr = "{}";
-    try {
-      const serialized = JSON.stringify(context || {}, null, 2);
-      contextStr = serialized.slice(0, 25000);
-    } catch {
-      contextStr = "{}";
+    // Bounded context serialization: only inject if isLalitQuestion is true
+    let contextStr = "";
+    if (isLalitQuestion) {
+      try {
+        const serialized = JSON.stringify(context || {}, null, 2);
+        contextStr = serialized.slice(0, 25000);
+      } catch {
+        contextStr = "";
+      }
     }
 
     const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -259,10 +273,24 @@ export default async function handler(req: any, res: any) {
     }
 
     // 3. Fallback response when no API keys are provided or both services are unreachable
+    let fallbackReply = "I'm listening! Feel free to ask any question or explore Lalit's portfolio.";
+    if (isLalitQuestion) {
+      fallbackReply =
+        "Lalit Modi is a Software Development Engineer skilled in React, Next.js, Node.js, and Java, with 395+ LeetCode problems solved. You can ask about his projects like Codeyx, explore his skills, or download his resume!";
+    } else if (/\b(fuck|bitch|chutiya|madarchod|saale)\b/i.test(qLower)) {
+      fallbackReply = "Let's keep things friendly! How can I help you today?";
+    } else if (/\b(abee|abe|oye|bro|bhai|yaar)\b/i.test(qLower)) {
+      fallbackReply = "Haan bhai! Kaho, kya dekhna ya poochna chahte ho?";
+    } else if (qLower.includes("joke")) {
+      fallbackReply = "Why do programmers prefer dark mode? Because light attracts bugs!";
+    } else if (qLower.includes("react")) {
+      fallbackReply = "React is a popular JavaScript library created by Meta for building modern user interfaces.";
+    }
+
     res.status(200).json({
-      intent: "FALLBACK_PORTFOLIO",
-      response: `Regarding "${sanitizedPrompt}", Lalit is a Full-Stack Engineer skilled in React, Next.js, Node.js, and Java, with 349+ LeetCode problems solved. You can ask about his projects like Codeyx, explore his skills, or download his resume!`,
-      action: { type: "open_app", target: "bear" },
+      intent: isLalitQuestion ? "PORTFOLIO_INFO" : "GENERAL_CONVERSATION",
+      response: fallbackReply,
+      action: isLalitQuestion ? { type: "open_app", target: "bear" } : null,
       modelUsed: "Portfolio AI Core (Local)"
     });
   } catch (err: any) {

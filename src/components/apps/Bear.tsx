@@ -1253,7 +1253,7 @@ const GithubStatsView = ({
 
             <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "10px" }}>
               <span style={{ fontSize: "32px", fontWeight: 800, color: dark ? "#ffffff" : "#0f172a" }}>
-                {lcStats ? lcStats.totalSolved : 349}
+                {lcStats ? lcStats.totalSolved : 395}
               </span>
               <span style={{ fontSize: "13px", fontWeight: 700, color: "#f89b1c" }}>
                 Problems Solved

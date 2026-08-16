@@ -43,6 +43,7 @@ declare global {
   const Messages: typeof import('./components/apps/Messages')['default']
   const MobileDock: typeof import('./components/mobile/MobileDock')['default']
   const Music: typeof import('./components/apps/Music')['default']
+  const MusicWidget: typeof import('./components/widgets/MusicWidget')['default']
   const Notes: typeof import('./components/apps/Notes')['default']
   const NotificationCenter: typeof import('./components/NotificationCenter')['default']
   const PdfIcon: typeof import('./components/DesktopIcons')['PdfIcon']

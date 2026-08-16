@@ -51,7 +51,7 @@ export const EDUCATION = [
 ];
 
 export const ACHIEVEMENTS = [
-  "Solved 349+ DSA problems on LeetCode (150 Easy, 171 Medium, 28 Hard); active competitive programmer with a focus on algorithmic optimization.",
+  "Solved 395+ DSA problems on LeetCode (155 Easy, 207 Medium, 33 Hard); active competitive programmer with a focus on algorithmic optimization.",
   "CodeChef: Achieved 1006+ Rating; Global Rank 4893 in Starters Contest.",
   "Consistently ranked in the top percentiles for university-wide technical evaluations and coding assessments.",
   "Developed 4 full-stack projects within a year, demonstrating strong engineering and rapid implementation skills."

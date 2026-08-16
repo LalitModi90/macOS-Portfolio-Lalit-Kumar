@@ -176,7 +176,7 @@ export default function Terminal() {
               <p><span className="text-cyan-300 font-semibold w-24 inline-block">Focus:</span> <span className="text-white">Data Structures & Algorithms + Full Stack Development</span></p>
               <p><span className="text-cyan-300 font-semibold w-24 inline-block">Location:</span> <span className="text-white">{portfolioData.location}</span></p>
               <p><span className="text-cyan-300 font-semibold w-24 inline-block">Education:</span> <span className="text-white">B.Tech CSE @ Parul Institute of Technology (8.34 CGPA)</span></p>
-              <p><span className="text-cyan-300 font-semibold w-24 inline-block">LeetCode:</span> <span className="text-amber-300">349+ Problems Solved (150 Easy, 171 Medium, 28 Hard)</span></p>
+              <p><span className="text-cyan-300 font-semibold w-24 inline-block">LeetCode:</span> <span className="text-amber-300">395+ Problems Solved (155 Easy, 207 Medium, 33 Hard)</span></p>
               <p><span className="text-cyan-300 font-semibold w-24 inline-block">GitHub:</span> <span className="text-emerald-300">github.com/LalitModi90 (15+ Repositories)</span></p>
             </div>
             <div className="text-cyan-400 text-xs whitespace-pre select-none leading-none">
@@ -255,7 +255,7 @@ export default function Terminal() {
             <div className="space-y-1">
               <p className="text-rose-300 font-semibold">[CS Fundamentals & Developer Tools]</p>
               <div className="space-y-0.5 pl-3 text-gray-300 text-xs">
-                <p>├── Data Structures & Algorithms (349+ Problems Solved on LeetCode)</p>
+                <p>├── Data Structures & Algorithms (395+ Problems Solved on LeetCode)</p>
                 <p>├── System Design, OOPs, DBMS, Operating Systems, Computer Networks</p>
                 <p>└── Tools: {tools.join(" • ")}</p>
               </div>
@@ -367,7 +367,7 @@ export default function Terminal() {
             </div>
             <p className="text-gray-300 text-xs">{lcUrl}</p>
             <div className="space-y-0.5 text-xs text-gray-300 pl-2">
-              <p>Problems Solved: <span className="text-white font-bold">349+</span></p>
+              <p>Problems Solved: <span className="text-white font-bold">395+</span></p>
               <p>├── <span className="text-emerald-400 font-semibold">Easy:</span> 150</p>
               <p>├── <span className="text-amber-400 font-semibold">Medium:</span> 171</p>
               <p>└── <span className="text-rose-400 font-semibold">Hard:</span> 28</p>
@@ -452,7 +452,7 @@ export default function Terminal() {
               <p>Software Development Engineer</p>
               <p>B.Tech CSE @ Parul Institute of Technology (8.34 CGPA)</p>
               <p>Full Stack Developer (Next.js / Node.js / React Native / MongoDB)</p>
-              <p>DSA / Problem Solving (349+ Solved on LeetCode)</p>
+              <p>DSA / Problem Solving (395+ Solved on LeetCode)</p>
             </div>
           </div>
         );
@@ -496,7 +496,7 @@ export default function Terminal() {
                   <p><span className="text-cyan-300 font-semibold">Role:</span> Software Development Engineer</p>
                   <p><span className="text-cyan-300 font-semibold">Stack:</span> MERN / Next.js / React / TypeScript / Java</p>
                   <p><span className="text-cyan-300 font-semibold">Focus:</span> DSA + Full Stack Systems</p>
-                  <p><span className="text-cyan-300 font-semibold">LeetCode:</span> 349+ Solved (LalitModi90)</p>
+                  <p><span className="text-cyan-300 font-semibold">LeetCode:</span> 395+ Solved (LalitModi90)</p>
                   <p><span className="text-cyan-300 font-semibold">GitHub:</span> LalitModi90 (15+ Repos)</p>
                   <p><span className="text-cyan-300 font-semibold">Portfolio:</span> Online (Active)</p>
                 </div>

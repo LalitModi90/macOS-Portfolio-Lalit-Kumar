@@ -57,7 +57,7 @@ Aspiring **Software Development Engineer (SDE)** with a strong foundation in **D
 
 ## Achievements & Competitive Programming
 
-- **LeetCode**: Solved **349+ DSA problems** (150 Easy, 171 Medium, 28 Hard); active competitive programmer focused on algorithmic optimization. Profile: [LeetCode/LalitModi90](https://leetcode.com/u/LalitModi90/)
+- **LeetCode**: Solved **395+ DSA problems** (155 Easy, 207 Medium, 33 Hard); active competitive programmer focused on algorithmic optimization. Profile: [LeetCode/LalitModi90](https://leetcode.com/u/LalitModi90/)
 - **CodeChef**: Achieved **1006+ Rating**; Global Rank **4893** in Starters Contest. Profile: [CodeChef/lalitmodi7878](https://www.codechef.com/users/lalitmodi7878)
 - **Academic Evaluation**: Consistently ranked in the top percentiles for university-wide technical evaluations and coding assessments.
 - **Engineering Speed**: Developed 4 full-stack projects within a year, demonstrating strong engineering and rapid implementation skills.

@@ -6,6 +6,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/sync-live-stats.js",
+    "predev": "node scripts/sync-live-stats.js",
     "build": "vite build",
     "dev": "vite --host",
     "lint": "eslint .",
