@@ -53,16 +53,7 @@ export default function StatusBar({ isAppOpen, appTitle, onLeftTap, onRightTap }
         }}>{h}:{m}</span>
       </div>
 
-      {/* CENTER - Dynamic Island */}
-      <div style={{
-        position: "absolute",
-        left: "50%", top: "8px",
-        transform: "translateX(-50%)",
-        width: "110px", height: "32px",
-        background: "#000",
-        borderRadius: "20px",
-        pointerEvents: "auto"
-      }} />
+
 
       {/* RIGHT side - Status icons row */}
       <div 

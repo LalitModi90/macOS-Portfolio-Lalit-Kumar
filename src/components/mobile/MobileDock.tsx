@@ -1,13 +1,13 @@
 import React from "react";
 import { apps } from "~/configs";
 import { useStore } from "~/stores";
+import IOSAppIcon from "~/components/mobile/IOSAppIcon";
 
 export default function MobileDock({ openApp }: { openApp: (id: string) => void }) {
   const dockApps = ["facetime", "messages", "safari", "music"];
 
-  const { dark, iconStyle } = useStore((s) => ({
+  const { dark } = useStore((s) => ({
     dark: s.dark,
-    iconStyle: s.iconStyle,
   }));
 
   const bgClass = dark 
@@ -28,11 +28,9 @@ export default function MobileDock({ openApp }: { openApp: (id: string) => void 
               className="flex flex-col items-center justify-center cursor-pointer active:opacity-70 transition-opacity"
               onClick={() => openApp(id)}
             >
-              <img 
-                src={`/${app.img}`} 
-                alt={app.title} 
-                className="w-[58px] h-[58px] object-cover rounded-[14px]"
-              />
+              <div className="w-[58px] h-[58px] rounded-[13px] overflow-hidden shadow-md flex-shrink-0">
+                <IOSAppIcon appId={app.id} desktopImg={`/${app.img}`} />
+              </div>
             </div>
           );
         })}

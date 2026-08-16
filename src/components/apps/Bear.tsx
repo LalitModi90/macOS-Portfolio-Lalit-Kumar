@@ -2161,6 +2161,16 @@ const Bear = () => {
   const dark = useStore((state) => state.dark);
   const [searchQuery, setSearchQuery] = useState("");
   const [githubRepos, setGithubRepos] = useState<GitHubRepo[]>([]);
+  const [winWidth, setWinWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
+  const [mobileView, setMobileView] = useState<"sidebar" | "midbar" | "content">("sidebar");
+
+  useEffect(() => {
+    const handleResize = () => setWinWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isMobile = winWidth < 768;
   const [loadingRepos, setLoadingRepos] = useState(false);
   const [repoError, setRepoError] = useState<string | null>(null);
 
@@ -2240,6 +2250,9 @@ const Bear = () => {
       });
       setSelectedRepo(null);
     }
+    if (isMobile) {
+      setMobileView("midbar");
+    }
   };
 
   const setContent = (id: string, url: string, index: number, repo?: GitHubRepo) => {
@@ -2261,9 +2274,128 @@ const Bear = () => {
       });
       setSelectedRepo(null);
     }
+    if (isMobile) {
+      setMobileView("content");
+    }
   };
 
   const activeCategory = bear[state.curSidebar].id;
+
+  if (isMobile) {
+    return (
+      <div className="bear font-avenir flex flex-col h-full w-full relative" style={{ background: dark ? "#0f172a" : "#f8fafc" }}>
+        {/* Toast Notification */}
+        {toast && (
+          <div
+            style={{
+              position: "fixed",
+              top: "20px",
+              right: "24px",
+              zIndex: 9999,
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "12px 18px",
+              borderRadius: "12px",
+              background: dark ? "rgba(15, 23, 42, 0.95)" : "#ffffff",
+              border: dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.08)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10)",
+              backdropFilter: "blur(16px)",
+              fontSize: "13px",
+              fontWeight: 600,
+              color: dark ? "#f1f5f9" : "#0f172a",
+              transition: "opacity 0.35s ease, transform 0.35s ease",
+              opacity: toast.visible ? 1 : 0,
+              transform: toast.visible ? "translateY(0)" : "translateY(-12px)",
+              pointerEvents: "none",
+              minWidth: "220px",
+              maxWidth: "340px"
+            }}
+          >
+            <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", flexShrink: 0 }} />
+            {toast.msg}
+          </div>
+        )}
+
+        {mobileView === "sidebar" && (
+          <div className="flex-1 flex flex-col w-full h-full overflow-hidden">
+            <div className="px-4 py-3 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
+              <span className="text-md font-bold text-gray-900 dark:text-white uppercase tracking-wider">Categories</span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <Sidebar
+                cur={state.curSidebar}
+                setMidBar={setMidBar}
+                projectsCount={githubRepos.length}
+              />
+            </div>
+          </div>
+        )}
+
+        {mobileView === "midbar" && (
+          <div className="flex-grow flex flex-col w-full h-full overflow-hidden">
+            <div className="px-4 py-3 border-b border-black/5 dark:border-white/5 flex items-center gap-3">
+              <button
+                onClick={() => setMobileView("sidebar")}
+                className="text-blue-500 font-semibold flex items-center text-sm"
+              >
+                ← Back
+              </button>
+              <span className="text-md font-bold text-gray-900 dark:text-white capitalize">
+                {bear[state.curSidebar].title}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <Middlebar
+                items={state.midbarList}
+                cur={state.curMidbar}
+                setContent={setContent}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                isProjectsCategory={activeCategory === "project"}
+                githubRepos={githubRepos}
+                loadingRepos={loadingRepos}
+                repoError={repoError}
+                onRefreshRepos={() => loadGitHubRepos(true)}
+                onRetryRepos={() => loadGitHubRepos(true)}
+              />
+            </div>
+          </div>
+        )}
+
+        {mobileView === "content" && (
+          <div className="flex-grow flex flex-col w-full h-full overflow-hidden">
+            <div className="px-4 py-3 border-b border-black/5 dark:border-white/5 flex items-center gap-3">
+              <button
+                onClick={() => setMobileView("midbar")}
+                className="text-blue-500 font-semibold flex items-center text-sm"
+              >
+                ← Notes
+              </button>
+              <span className="text-md font-bold text-gray-900 dark:text-white truncate max-w-[200px]">
+                {selectedRepo ? selectedRepo.display_name : (state.midbarList[state.curMidbar]?.title || "Detail")}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <Content
+                contentID={state.contentID}
+                contentURL={state.contentURL}
+                activeCategory={activeCategory}
+                selectedRepo={selectedRepo}
+                loadingReadme={loadingReadme}
+                readmeContent={readmeContent}
+                loadingRepos={loadingRepos}
+                repoError={repoError}
+                githubRepos={githubRepos}
+                onRetryRepos={() => loadGitHubRepos(true)}
+                showToast={showToast}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="bear font-avenir flex h-full" style={{ background: dark ? "#0f172a" : "#f8fafc", position: "relative" }}>

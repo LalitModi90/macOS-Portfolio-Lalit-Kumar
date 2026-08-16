@@ -70,6 +70,8 @@ export default function App() {
     tintWindows: s.tintWindows,
   }));
   const activeWallpaper = getWallpaper();
+  const currentBgUrl = dark ? activeWallpaper.night : activeWallpaper.day;
+  const isVideoWallpaper = currentBgUrl?.includes('.mp4') || currentBgUrl?.includes('video');
 
   // Sync the persisted appearance to the <html> dark class on mount.
   useEffect(() => {
@@ -126,12 +128,30 @@ export default function App() {
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: `url(${dark ? activeWallpaper.night : activeWallpaper.day})`,
+          backgroundImage: isVideoWallpaper ? "none" : `url(${currentBgUrl})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           zIndex: 0,
         }}
-      />
+      >
+        {isVideoWallpaper && (
+          <video
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              zIndex: -1,
+            }}
+            src={currentBgUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        )}
+      </div>
 
       <AnimatePresence mode="popLayout">
         {page === "boot" && (

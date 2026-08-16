@@ -24,7 +24,6 @@ const apps: AppsData[] = [
     width: 860,
     height: 500,
     show: true,
-    hideOnMobile: true,
     y: -40,
     img: "img/icons/know-me.png",
     content: <Bear />,

@@ -8,6 +8,7 @@ import MobileDock from "~/components/mobile/MobileDock";
 import ControlCenterMenu from "~/components/menus/ControlCenterMenu";
 import NotificationCenter from "~/components/NotificationCenter";
 import { useAudioContext } from "~/context/AudioContext";
+import IOSAppIcon from "~/components/mobile/IOSAppIcon";
 
 export default function Mobile(props: MacActions) {
   const [activeApp, setActiveApp] = useState<string | null>(null);
@@ -41,6 +42,8 @@ export default function Mobile(props: MacActions) {
   };
 
   const activeWallpaper = getWallpaper();
+  const currentBgUrl = dark ? activeWallpaper.night : activeWallpaper.day;
+  const isVideoWallpaper = currentBgUrl?.includes('.mp4') || currentBgUrl?.includes('video');
 
   const openApp = (id: string) => {
     setActiveApp(id);
@@ -51,7 +54,7 @@ export default function Mobile(props: MacActions) {
   };
 
   const bgStyle: React.CSSProperties = {
-    backgroundImage: `url(${dark ? activeWallpaper.night : activeWallpaper.day})`,
+    backgroundImage: isVideoWallpaper ? "none" : `url(${currentBgUrl})`,
     backgroundSize: "cover",
     backgroundPosition: "center",
     filter: `brightness(${(brightness as number) * 0.7 + 50}%)`,
@@ -62,6 +65,16 @@ export default function Mobile(props: MacActions) {
 
   return (
     <div className="size-full overflow-hidden relative" style={bgStyle}>
+      {isVideoWallpaper && (
+        <video
+          className="absolute inset-0 w-full h-full object-cover -z-10"
+          src={currentBgUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      )}
       <StatusBar 
         isAppOpen={activeApp !== null} 
         appTitle={activeApp ? (activeApp === 'finder' ? 'Files' : apps.find(a => a.id === activeApp)?.title) : ""} 
@@ -137,18 +150,16 @@ export default function Mobile(props: MacActions) {
              <div className="flex-1 px-5 pt-6">
                 <div className="grid grid-cols-4 gap-x-3 gap-y-7">
                   {apps
-                    .filter((app) => app.desktop && !dockApps.includes(app.id) && !["terminal", "vscode", "typora", "siri", "github", "bear", "youtube", "spotify"].includes(app.id))
+                    .filter((app) => app.desktop && !dockApps.includes(app.id) && !["terminal", "vscode", "typora", "siri", "github", "youtube", "spotify"].includes(app.id))
                     .map((app) => (
                     <div 
                       key={app.id} 
                       className="flex flex-col items-center gap-1.5 cursor-pointer active:opacity-70 transition-opacity" 
                       onClick={() => openApp(app.id)}
                     >
-                       <img 
-                         src={`/${app.id === 'finder' ? 'img/icons/folder-generic.png' : app.img}`} 
-                         alt={app.id === 'finder' ? 'Files' : app.id === 'system-settings' ? 'Settings' : app.title} 
-                         className="w-[60px] h-[60px] object-cover rounded-[14px]" 
-                       />
+                       <div className="w-[60px] h-[60px] rounded-[14px] overflow-hidden shadow-md flex-shrink-0">
+                         <IOSAppIcon appId={app.id} desktopImg={`/${app.id === 'finder' ? 'img/icons/folder-generic.png' : app.img}`} />
+                       </div>
                        <span className="text-white text-[11px] font-medium tracking-wide drop-shadow-md text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-0.5">
                          {app.id === 'finder' ? 'Files' : app.id === 'system-settings' ? 'Settings' : app.title}
                        </span>

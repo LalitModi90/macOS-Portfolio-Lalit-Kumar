@@ -30,6 +30,7 @@ declare global {
   const FolderDockIcon: typeof import('./components/DesktopIcons')['FolderDockIcon']
   const FolderHomeIcon: typeof import('./components/DesktopIcons')['FolderHomeIcon']
   const FolderIcon: typeof import('./components/DesktopIcons')['FolderIcon']
+  const IOSAppIcon: typeof import('./components/mobile/IOSAppIcon')['default']
   const Launchpad: typeof import('./components/Launchpad')['default']
   const LocationInfo: typeof import('./components/maps/LocationInfo')['default']
   const MAP_LOCATIONS: typeof import('./components/maps/mapConfig')['MAP_LOCATIONS']

@@ -364,6 +364,7 @@ export default function Safari({ width = 800 }: SafariProps) {
   // Check if running in Electron environment with electronAPI bridge
   const electronAPI = typeof window !== "undefined" ? window.electronAPI : undefined;
   const isElectron = !!electronAPI?.isElectron || (typeof window !== "undefined" && window.navigator.userAgent.toLowerCase().includes("electron"));
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   const activeTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
 
@@ -749,99 +750,101 @@ export default function Safari({ width = 800 }: SafariProps) {
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: dark ? "#11131b" : "#f6f6f8" }}>
       
       {/* Chrome / Safari Tabs Strip */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          height: "36px",
-          background: dark ? "rgba(14, 16, 24, 0.95)" : "rgba(225, 228, 236, 0.95)",
-          borderBottom: dark ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(0,0,0,0.06)",
-          padding: "0 8px",
-          gap: "4px",
-          overflowX: "auto"
-        }}
-        className="no-scrollbar"
-      >
-        {tabs.map((tab) => {
-          const isActive = tab.id === activeTabId;
-          return (
-            <div
-              key={tab.id}
-              onClick={() => selectTab(tab.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                height: "28px",
-                padding: "0 10px",
-                borderRadius: "8px 8px 0 0",
-                background: isActive
-                  ? dark ? "rgba(25, 28, 40, 0.95)" : "#f6f6f8"
-                  : "transparent",
-                color: isActive
-                  ? dark ? "#ffffff" : "#1c1c1e"
-                  : dark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)",
-                fontSize: "12px",
-                fontWeight: isActive ? 600 : 400,
-                cursor: "pointer",
-                maxWidth: "180px",
-                minWidth: "100px",
-                gap: "8px",
-                borderTop: isActive ? (dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.08)") : "none",
-                borderLeft: isActive ? (dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.08)") : "none",
-                borderRight: isActive ? (dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.08)") : "none",
-                transition: "background 0.15s ease"
-              }}
-            >
-              {tab.favicon ? (
-                <img src={tab.favicon} alt="" style={{ width: "14px", height: "14px", borderRadius: "2px" }} />
-              ) : (
-                <ShieldSVG className={`w-3 h-3 ${tab.isBlocked ? "text-red-500" : "text-blue-400"} flex-shrink-0`} />
-              )}
-              <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {tab.isLoading ? "Loading..." : tab.title || "Start Page"}
-              </span>
-              <button
-                onClick={(e) => closeTab(e, tab.id)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "2px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "50%",
-                  color: "inherit",
-                  opacity: 0.7
-                }}
-                className="hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10"
-              >
-                <CloseSVG className="w-3 h-3" />
-              </button>
-            </div>
-          );
-        })}
-
-        <button
-          onClick={addTab}
-          title="New Tab"
+      {!isMobile && (
+        <div
           style={{
-            background: "transparent",
-            border: "none",
-            color: dark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
-            cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            width: "24px",
-            height: "24px",
-            borderRadius: "6px"
+            height: "36px",
+            background: dark ? "rgba(14, 16, 24, 0.95)" : "rgba(225, 228, 236, 0.95)",
+            borderBottom: dark ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(0,0,0,0.06)",
+            padding: "0 8px",
+            gap: "4px",
+            overflowX: "auto"
           }}
-          className="hover:bg-black/10 dark:hover:bg-white/10"
+          className="no-scrollbar"
         >
-          <PlusSVG className="w-3.5 h-3.5" />
-        </button>
-      </div>
+          {tabs.map((tab) => {
+            const isActive = tab.id === activeTabId;
+            return (
+              <div
+                key={tab.id}
+                onClick={() => selectTab(tab.id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  height: "28px",
+                  padding: "0 10px",
+                  borderRadius: "8px 8px 0 0",
+                  background: isActive
+                    ? dark ? "rgba(25, 28, 40, 0.95)" : "#f6f6f8"
+                    : "transparent",
+                  color: isActive
+                    ? dark ? "#ffffff" : "#1c1c1e"
+                    : dark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)",
+                  fontSize: "12px",
+                  fontWeight: isActive ? 600 : 400,
+                  cursor: "pointer",
+                  maxWidth: "180px",
+                  minWidth: "100px",
+                  gap: "8px",
+                  borderTop: isActive ? (dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.08)") : "none",
+                  borderLeft: isActive ? (dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.08)") : "none",
+                  borderRight: isActive ? (dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.08)") : "none",
+                  transition: "background 0.15s ease"
+                }}
+              >
+                {tab.favicon ? (
+                  <img src={tab.favicon} alt="" style={{ width: "14px", height: "14px", borderRadius: "2px" }} />
+                ) : (
+                  <ShieldSVG className={`w-3 h-3 ${tab.isBlocked ? "text-red-500" : "text-blue-400"} flex-shrink-0`} />
+                )}
+                <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {tab.isLoading ? "Loading..." : tab.title || "Start Page"}
+                </span>
+                <button
+                  onClick={(e) => closeTab(e, tab.id)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "2px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "50%",
+                    color: "inherit",
+                    opacity: 0.7
+                  }}
+                  className="hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10"
+                >
+                  <CloseSVG className="w-3 h-3" />
+                </button>
+              </div>
+            );
+          })}
+
+          <button
+            onClick={addTab}
+            title="New Tab"
+            style={{
+              background: "transparent",
+              border: "none",
+              color: dark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "24px",
+              height: "24px",
+              borderRadius: "6px"
+            }}
+            className="hover:bg-black/10 dark:hover:bg-white/10"
+          >
+            <PlusSVG className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Browser Main Toolbar */}
       <div
@@ -857,47 +860,49 @@ export default function Safari({ width = 800 }: SafariProps) {
         }}
       >
         {/* Back & Forward Controls */}
-        <div style={{ display: "flex", gap: "2px" }}>
-          <button
-            onClick={goBack}
-            disabled={!canGoBack}
-            title="Back"
-            style={{
-              background: "transparent",
-              border: "none",
-              color: canGoBack ? (dark ? "#ffffff" : "#1c1c1e") : (dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"),
-              cursor: canGoBack ? "pointer" : "default",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "28px",
-              height: "28px",
-              borderRadius: "6px"
-            }}
-          >
-            <BackSVG className="w-4 h-4" />
-          </button>
+        {!isMobile && (
+          <div style={{ display: "flex", gap: "2px" }}>
+            <button
+              onClick={goBack}
+              disabled={!canGoBack}
+              title="Back"
+              style={{
+                background: "transparent",
+                border: "none",
+                color: canGoBack ? (dark ? "#ffffff" : "#1c1c1e") : (dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"),
+                cursor: canGoBack ? "pointer" : "default",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px"
+              }}
+            >
+              <BackSVG className="w-4 h-4" />
+            </button>
 
-          <button
-            onClick={goForward}
-            disabled={!canGoForward}
-            title="Forward"
-            style={{
-              background: "transparent",
-              border: "none",
-              color: canGoForward ? (dark ? "#ffffff" : "#1c1c1e") : (dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"),
-              cursor: canGoForward ? "pointer" : "default",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "28px",
-              height: "28px",
-              borderRadius: "6px"
-            }}
-          >
-            <ForwardSVG className="w-4 h-4" />
-          </button>
-        </div>
+            <button
+              onClick={goForward}
+              disabled={!canGoForward}
+              title="Forward"
+              style={{
+                background: "transparent",
+                border: "none",
+                color: canGoForward ? (dark ? "#ffffff" : "#1c1c1e") : (dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"),
+                cursor: canGoForward ? "pointer" : "default",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px"
+              }}
+            >
+              <ForwardSVG className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Search / Address Bar */}
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
@@ -946,50 +951,52 @@ export default function Safari({ width = 800 }: SafariProps) {
         </div>
 
         {/* Quick Actions */}
-        <div style={{ display: "flex", gap: "2px" }}>
-          <button
-            onClick={() => navigateUrl("")}
-            title="Start Page"
-            style={{
-              background: "transparent",
-              border: "none",
-              color: dark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.75)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "28px",
-              height: "28px",
-              borderRadius: "6px"
-            }}
-          >
-            <HomeSVG className="w-4 h-4" />
-          </button>
+        {!isMobile && (
+          <div style={{ display: "flex", gap: "2px" }}>
+            <button
+              onClick={() => navigateUrl("")}
+              title="Start Page"
+              style={{
+                background: "transparent",
+                border: "none",
+                color: dark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.75)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px"
+              }}
+            >
+              <HomeSVG className="w-4 h-4" />
+            </button>
 
-          <button
-            title="Share URL"
-            onClick={() => {
-              if (inputUrl && navigator.clipboard) {
-                navigator.clipboard.writeText(inputUrl);
-                alert("Copied URL to clipboard!");
-              }
-            }}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: dark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.75)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "28px",
-              height: "28px",
-              borderRadius: "6px"
-            }}
-          >
-            <ShareSVG className="w-4 h-4" />
-          </button>
-        </div>
+            <button
+              title="Share URL"
+              onClick={() => {
+                if (inputUrl && navigator.clipboard) {
+                  navigator.clipboard.writeText(inputUrl);
+                  alert("Copied URL to clipboard!");
+                }
+              }}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: dark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.75)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px"
+              }}
+            >
+              <ShareSVG className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Browser Content Area */}

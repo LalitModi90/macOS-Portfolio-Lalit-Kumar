@@ -195,7 +195,17 @@ export default function MessagesApp() {
   const [activeConv, setActiveConv] = useState<Conversation>(INITIAL_CONVERSATIONS[0]);
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
+  const [winWidth, setWinWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
+  const [showSidebar, setShowSidebar] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleResize = () => setWinWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isMobile = winWidth < 768;
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -268,16 +278,17 @@ export default function MessagesApp() {
       }}
     >
       {/* Sidebar */}
-      <div
-        style={{
-          width: "240px",
-          flexShrink: 0,
-          borderRight: "0.5px solid rgba(0,0,0,0.1)",
-          background: "rgba(242,242,247,0.98)",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      {(!isMobile || showSidebar) && (
+        <div
+          style={{
+            width: isMobile ? "100%" : "240px",
+            flexShrink: 0,
+            borderRight: isMobile ? "none" : "0.5px solid rgba(0,0,0,0.1)",
+            background: "rgba(242,242,247,0.98)",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
         {/* Header */}
         <div
           style={{
@@ -353,6 +364,9 @@ export default function MessagesApp() {
                   setConversations((prev) =>
                     prev.map((c) => (c.id === conv.id ? { ...c, unread: 0 } : c))
                   );
+                  if (isMobile) {
+                    setShowSidebar(false);
+                  }
                 }}
                 style={{
                   display: "flex",
@@ -464,36 +478,58 @@ export default function MessagesApp() {
           })}
         </div>
       </div>
+      )}
 
       {/* Chat Area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {/* Header */}
-        <div
-          style={{
-            padding: "10px 16px",
-            borderBottom: "0.5px solid rgba(0,0,0,0.08)",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            background: "rgba(248,248,250,0.99)",
-          }}
-        >
+      {(!isMobile || !showSidebar) && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {/* Header */}
           <div
             style={{
-              width: 32,
-              height: 32,
-              borderRadius: "50%",
-              background: activeConv.avatarBg || "linear-gradient(135deg, #007AFF, #5856D6)",
+              padding: "10px 16px",
+              borderBottom: "0.5px solid rgba(0,0,0,0.08)",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: 700,
-              color: "white",
+              gap: "10px",
+              background: "rgba(248,248,250,0.99)",
             }}
           >
-            {activeConv.avatar}
-          </div>
+            {isMobile && (
+              <button
+                onClick={() => setShowSidebar(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#007AFF",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  marginRight: "6px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <span>←</span>
+                <span>Chats</span>
+              </button>
+            )}
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                background: activeConv.avatarBg || "linear-gradient(135deg, #007AFF, #5856D6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "12px",
+                fontWeight: 700,
+                color: "white",
+              }}
+            >
+              {activeConv.avatar}
+            </div>
           <div>
             <div style={{ fontSize: "14px", fontWeight: 600, color: "#1c1c1e" }}>
               {activeConv.name}
@@ -683,6 +719,7 @@ export default function MessagesApp() {
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 }

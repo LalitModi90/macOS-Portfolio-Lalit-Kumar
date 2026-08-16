@@ -32,9 +32,9 @@ export const wallpaperSets: WallpaperSet[] = [
   {
     id: "tahoe",
     name: "macOS Tahoe",
-    day: "wallpapers/DefaultAerial_Tahoe_Beach.jpg",
-    night: "wallpapers/DefaultAerial_Tahoe_Beach.jpg",
-    thumbnail: "wallpapers/DefaultAerial_Tahoe_Beach.jpg",
+    day: "wallpapers/anime-live-wallpaper (1).mp4",
+    night: "wallpapers/anime-live-wallpaper (1).mp4",
+    thumbnail: "wallpapers/anime-live-wallpaper (1).mp4",
   },
   {
     id: "tahoe-light",

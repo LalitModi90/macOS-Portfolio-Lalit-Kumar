@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface MailMessage {
@@ -35,15 +35,15 @@ const INITIAL_MESSAGES: MailMessage[] = [
   },
   {
     id: "2",
-    from: "Vercel",
-    fromEmail: "noreply@vercel.com",
+    from: "Netlify",
+    fromEmail: "noreply@netlify.com",
     subject: "Deployment successful — portfolio",
     preview: "Your project portfolio has been deployed to production.",
-    body: "Your project portfolio has been deployed to production.\n\nDeployment URL: https://portfolio.vercel.app\nBranch: main\nCommit: e160e02\n\nThis deployment is now live and ready.",
+    body: "Your project portfolio has been deployed to production.\n\nDeployment URL: https://lalitkumarprotfolio.netlify.app\nBranch: main\nCommit: e160e02\n\nThis deployment is now live and ready.",
     time: "10:38 AM",
     unread: true,
-    avatar: "V",
-    avatarBg: "linear-gradient(135deg, #000000, #333333)",
+    avatar: "N",
+    avatarBg: "linear-gradient(135deg, #00C7B7, #008080)",
     folder: "Inbox",
   },
   {
@@ -76,12 +76,63 @@ const INITIAL_MESSAGES: MailMessage[] = [
 
 const FOLDERS = ["Inbox", "Sent", "Drafts", "Starred", "Trash"] as const;
 
+function renderFolderIcon(folder: string) {
+  switch (folder) {
+    case "Inbox":
+      return (
+        <svg className="w-4.5 h-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+          <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+        </svg>
+      );
+    case "Sent":
+      return (
+        <svg className="w-4.5 h-4.5 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
+      );
+    case "Drafts":
+      return (
+        <svg className="w-4.5 h-4.5 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+          <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+        </svg>
+      );
+    case "Starred":
+      return (
+        <svg className="w-4.5 h-4.5 text-yellow-500" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      );
+    case "Trash":
+      return (
+        <svg className="w-4.5 h-4.5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
 export default function Mail() {
   const [messages, setMessages] = useState<MailMessage[]>(INITIAL_MESSAGES);
   const [activeFolder, setActiveFolder] = useState<typeof FOLDERS[number]>("Inbox");
   const [selectedId, setSelectedId] = useState<string>(INITIAL_MESSAGES[0].id);
   const [search, setSearch] = useState("");
   const [composing, setComposing] = useState(false);
+  const [winWidth, setWinWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
+  const [mobileView, setMobileView] = useState<"folders" | "list" | "detail">("folders");
+
+  useEffect(() => {
+    const handleResize = () => setWinWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isMobile = winWidth < 768;
 
   // Compose State
   const [composeTo, setComposeTo] = useState(`Lalit Kumar <${LALIT_EMAIL}>`);
@@ -164,53 +215,121 @@ export default function Mail() {
       </AnimatePresence>
 
       {/* Sidebar — Mailbox Folders */}
-      <div className="w-40 sm:w-44 flex-shrink-0 bg-[#ebebf0]/95 dark:bg-[#181a22]/95 border-r border-black/10 dark:border-white/10 flex flex-col py-2 backdrop-blur-xl">
-        <div className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3.5 py-1.5">
-          Mailboxes
-        </div>
+      {(!isMobile || mobileView === "folders") && (
+        <div className={`${isMobile ? "w-full bg-[#f2f2f7] dark:bg-black" : "w-40 sm:w-44 bg-[#ebebf0]/95 dark:bg-[#181a22]/95 border-r border-black/10 dark:border-white/10"} flex-shrink-0 flex flex-col py-2 backdrop-blur-xl`}>
+          {isMobile ? (
+            <div className="px-4 pt-6 pb-2 flex items-center justify-between">
+              <span className="text-3xl font-extrabold text-black dark:text-white">Mailboxes</span>
+              <button className="text-blue-500 hover:text-blue-600 text-sm font-semibold">Edit</button>
+            </div>
+          ) : (
+            <div className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3.5 py-1.5">
+              Mailboxes
+            </div>
+          )}
 
-        <div className="flex-1 space-y-0.5 px-1.5">
-          {FOLDERS.map((folder) => {
-            const count = messages.filter((m) => (folder === "Starred" ? m.starred : m.folder === folder && m.unread)).length;
-            const isSelected = activeFolder === folder;
-            return (
-              <button
-                key={folder}
-                onClick={() => setActiveFolder(folder)}
-                className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isSelected
-                    ? "bg-blue-600/15 text-blue-600 dark:text-blue-400 font-semibold"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
-                }`}
-              >
-                <span>{folder}</span>
-                {count > 0 && (
-                  <span className="bg-blue-600 text-white rounded-full text-[10px] font-bold px-1.5 py-0.2 min-w-4 text-center">
-                    {count}
-                  </span>
-                )}
+          <div className={`${isMobile ? "mx-4 my-2 bg-white dark:bg-[#1c1c1e] rounded-xl overflow-hidden shadow-sm border border-black/[0.03] dark:border-white/[0.03] divide-y divide-black/5 dark:divide-white/5" : "flex-1 space-y-0.5 px-1.5"}`}>
+            {FOLDERS.map((folder) => {
+              const count = messages.filter((m) => (folder === "Starred" ? m.starred : m.folder === folder && m.unread)).length;
+              const isSelected = activeFolder === folder;
+              return (
+                <button
+                  key={folder}
+                  onClick={() => {
+                    setActiveFolder(folder);
+                    if (isMobile) {
+                      setMobileView("list");
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between transition-colors ${
+                    isMobile 
+                      ? "px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-black/5 dark:hover:bg-white/5"
+                      : `px-3 py-1.5 rounded-lg text-xs font-medium ${
+                          isSelected
+                            ? "bg-blue-600/15 text-blue-600 dark:text-blue-400 font-semibold"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
+                        }`
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {isMobile && renderFolderIcon(folder)}
+                    <span className={isMobile ? "font-semibold" : ""}>{folder}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {count > 0 && (
+                      <span className={`${isMobile ? "text-gray-400 text-sm font-normal" : "bg-blue-600 text-white rounded-full text-[10px] font-bold px-1.5 py-0.2 min-w-4 text-center"}`}>
+                        {count}
+                      </span>
+                    )}
+                    {isMobile && (
+                      <svg className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {isMobile ? (
+            <div className="mt-auto border-t border-black/10 dark:border-white/10 px-4 py-2.5 flex items-center justify-between bg-[#f9f9f9]/90 dark:bg-[#161616]/90 backdrop-blur-xl">
+              <button className="text-blue-500 hover:text-blue-600">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /><line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" />
+                </svg>
               </button>
-            );
-          })}
+              <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Updated Just Now</span>
+              <button
+                onClick={() => setComposing(true)}
+                className="text-blue-500 hover:text-blue-600 p-1"
+                title="Compose Email"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <div className="p-2.5">
+              <button
+                onClick={() => setComposing(true)}
+                className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5 transition-all"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Compose</span>
+              </button>
+            </div>
+          )}
         </div>
-
-        {/* Compose Button */}
-        <div className="p-2.5">
-          <button
-            onClick={() => setComposing(true)}
-            className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5 transition-all"
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            <span>Compose</span>
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Messages List Column */}
-      <div className="w-64 sm:w-72 flex-shrink-0 bg-[#f8f8fc]/95 dark:bg-[#161821]/95 border-r border-black/10 dark:border-white/10 flex flex-col overflow-hidden">
+      {(!isMobile || mobileView === "list") && (
+        <div className={`${isMobile ? "w-full bg-white dark:bg-black" : "w-64 sm:w-72 bg-[#f8f8fc]/95 dark:bg-[#161821]/95 border-r border-black/10 dark:border-white/10"} flex-shrink-0 flex flex-col overflow-hidden`}>
+          {isMobile && (
+            <div className="px-3 py-2 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-black/[0.02] dark:bg-white/[0.02]">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setMobileView("folders")}
+                  className="text-blue-600 dark:text-blue-400 font-semibold text-xs flex items-center"
+                >
+                  ← Folders
+                </button>
+                <span className="text-xs font-bold text-gray-800 dark:text-gray-100 capitalize">{activeFolder}</span>
+              </div>
+              <button
+                onClick={() => setComposing(true)}
+                className="text-blue-600 dark:text-blue-400 text-xs font-semibold"
+              >
+                Compose
+              </button>
+            </div>
+          )}
         {/* Search */}
         <div className="p-2.5 border-b border-black/5 dark:border-white/5">
           <div className="flex items-center gap-2 bg-black/5 dark:bg-white/10 rounded-xl px-2.5 py-1.5">
@@ -250,6 +369,9 @@ export default function Mail() {
                     setMessages((prev) =>
                       prev.map((m) => (m.id === msg.id ? { ...m, unread: false } : m))
                     );
+                    if (isMobile) {
+                      setMobileView("detail");
+                    }
                   }}
                   className={`w-full flex items-start gap-2.5 p-2.5 rounded-xl text-left transition-all relative ${
                     isSelected
@@ -292,10 +414,48 @@ export default function Mail() {
             })
           )}
         </div>
+        {isMobile && (
+          <div className="border-t border-black/10 dark:border-white/10 px-4 py-2.5 flex items-center justify-between bg-[#f9f9f9]/90 dark:bg-[#161616]/90 backdrop-blur-xl">
+            <button className="text-blue-500 hover:text-blue-600">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /><line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" />
+              </svg>
+            </button>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold">{filtered.length} Messages</span>
+            <button
+              onClick={() => setComposing(true)}
+              className="text-blue-500 hover:text-blue-600 p-1"
+              title="Compose Email"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
+      )}
 
       {/* Message View Area */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-[#12141a] overflow-hidden">
+      {(!isMobile || mobileView === "detail") && (
+        <div className="flex-1 flex flex-col bg-white dark:bg-[#12141a] overflow-hidden">
+          {isMobile && (
+            <div className="px-4 py-2.5 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-white dark:bg-[#12141a]">
+              <button
+                onClick={() => setMobileView("list")}
+                className="text-blue-600 dark:text-blue-400 font-semibold text-xs flex items-center"
+              >
+                ← Back
+              </button>
+              <button
+                onClick={() => setComposing(true)}
+                className="text-blue-600 dark:text-blue-400 text-xs font-semibold"
+              >
+                Compose
+              </button>
+            </div>
+          )}
         {activeMsg ? (
           <div className="flex-1 flex flex-col p-6 overflow-y-auto">
             {/* Header */}
@@ -347,17 +507,61 @@ export default function Mail() {
             Select a message to read
           </div>
         )}
+        {isMobile && activeMsg && (
+          <div className="border-t border-black/10 dark:border-white/10 px-6 py-2.5 flex items-center justify-between bg-[#f9f9f9]/90 dark:bg-[#161616]/90 backdrop-blur-xl mt-auto">
+            <button
+              onClick={() => {
+                setMessages((prev) => prev.filter((m) => m.id !== activeMsg.id));
+                setSelectedId("");
+                setMobileView("list");
+              }}
+              className="text-red-500 hover:text-red-600 p-1"
+              title="Delete Email"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </button>
+            <button
+              onClick={() => {
+                setComposeSubject(`Re: ${activeMsg.subject}`);
+                setComposing(true);
+              }}
+              className="text-blue-500 hover:text-blue-600 p-1"
+              title="Reply"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 17 4 12 9 7" /><path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setComposing(true)}
+              className="text-blue-500 hover:text-blue-600 p-1"
+              title="New Message"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
+      )}
 
       {/* macOS Compose Modal Window */}
       <AnimatePresence>
         {composing && (
           <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.96 }}
+            initial={isMobile ? { opacity: 0, y: "100%" } : { opacity: 0, y: 30, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.96 }}
-            transition={{ duration: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
-            className="absolute bottom-4 right-4 w-full max-w-lg bg-white/95 dark:bg-[#1a1c24]/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-black/10 dark:border-white/15 flex flex-col overflow-hidden z-50"
+            exit={isMobile ? { opacity: 0, y: "100%" } : { opacity: 0, y: 20, scale: 0.96 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className={`absolute z-50 bg-white/95 dark:bg-[#1a1c24]/95 backdrop-blur-2xl shadow-2xl border border-black/10 dark:border-white/15 flex flex-col overflow-hidden ${
+              isMobile
+                ? "bottom-0 inset-x-0 w-full rounded-t-2xl h-[75%]"
+                : "bottom-4 right-4 w-full max-w-lg rounded-2xl"
+            }`}
           >
             {/* Modal Header */}
             <div className="px-4 py-2.5 bg-gray-100/90 dark:bg-[#20232d]/90 border-b border-black/5 dark:border-white/10 flex items-center justify-between">
@@ -370,7 +574,7 @@ export default function Mail() {
               </button>
             </div>
 
-            <form onSubmit={handleSendEmail} className="flex flex-col">
+            <form onSubmit={handleSendEmail} className="flex-1 flex flex-col min-h-0">
               {/* To Field */}
               <div className="px-4 py-2 border-b border-black/5 dark:border-white/5 flex items-center gap-2 text-xs">
                 <span className="text-gray-400 w-12 font-medium">To:</span>
@@ -434,8 +638,7 @@ export default function Mail() {
                 placeholder="Write your email to Lalit..."
                 value={composeBody}
                 onChange={(e) => setComposeBody(e.target.value)}
-                rows={7}
-                className="p-4 bg-transparent border-none outline-none text-xs sm:text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 resize-none leading-relaxed"
+                className="p-4 bg-transparent border-none outline-none text-xs sm:text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 resize-none leading-relaxed flex-1 min-h-0 overflow-y-auto"
               />
 
               {/* Modal Footer */}
