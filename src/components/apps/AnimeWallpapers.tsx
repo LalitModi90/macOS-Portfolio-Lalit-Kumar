@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "~/stores";
+import { getCuratedWallpapers } from "~/data/animeWallpapersData";
 
 export interface WallpaperHit {
   id: number;
@@ -187,17 +188,28 @@ export default function AnimeWallpapers() {
 
       try {
         const qParam = encodeURIComponent(query || "anime");
-        const res = await fetch(`/api/wallpapers?q=${qParam}&media=${targetMedia}&page=${targetPage}&per_page=10`);
+        let rawHits: WallpaperHit[] = [];
 
-        if (!res.ok) {
-          if (res.status === 429) {
-            throw new Error("API rate limit exceeded. Please try again later.");
+        try {
+          const res = await fetch(
+            `/api/wallpapers?q=${qParam}&media=${targetMedia}&page=${targetPage}&per_page=10`,
+            { signal: AbortSignal.timeout(3000) }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.hits && Array.isArray(data.hits) && data.hits.length > 0) {
+              rawHits = data.hits;
+            }
           }
-          throw new Error("No suitable wallpapers found. Try another search.");
+        } catch {
+          // Handled gracefully below via curated library
         }
 
-        const data = await res.json();
-        const rawHits: WallpaperHit[] = data.hits || [];
+        // Seamless fallback to high quality built-in 4K Anime Wallpapers library
+        if (rawHits.length === 0) {
+          const curated = getCuratedWallpapers(query, targetMedia, targetPage, 10);
+          rawHits = curated.hits;
+        }
 
         // FRONTEND RESULT VALIDATION: Inspect metadata / tags & filter out questionable or suggestive hits
         const safeHits = rawHits.filter((item) => {
@@ -211,30 +223,23 @@ export default function AnimeWallpapers() {
             fetchWallpapers(query, 1, targetMedia);
             return;
           } else {
-            setError("No suitable wallpapers found. Try another search.");
-            setWallpapers([]);
+            const defaultCurated = getCuratedWallpapers("anime", targetMedia, 1, 10);
+            setWallpapers(defaultCurated.hits);
+            setError(null);
           }
         } else {
-          const uniqueHits = safeHits.filter((h) => !seenIds.has(h.id));
-          const finalHits = uniqueHits.length > 0 ? uniqueHits : safeHits;
-
-          setSeenIds((prev) => {
-            const next = new Set(prev);
-            finalHits.forEach((h) => next.add(h.id));
-            return next;
-          });
-
-          setWallpapers(finalHits);
+          setWallpapers(safeHits);
           setError(null);
         }
       } catch {
-        setError("No suitable wallpapers found. Try another search.");
-        setWallpapers([]);
+        const defaultCurated = getCuratedWallpapers(query, targetMedia, 1, 10);
+        setWallpapers(defaultCurated.hits);
+        setError(null);
       } finally {
         setLoading(false);
       }
     },
-    [seenIds]
+    []
   );
 
   useEffect(() => {
