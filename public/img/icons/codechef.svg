@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="cc-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5B4636"/>
+      <stop offset="100%" stop-color="#3D2E24"/>
+    </linearGradient>
+    <linearGradient id="cc-chef" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F2EDE4"/>
+    </linearGradient>
+    <filter id="cc-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="115" fill="url(#cc-bg)"/>
+  <rect width="508" height="508" x="2" y="2" rx="113" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4"/>
+  <g transform="translate(96, 96)" filter="url(#cc-shadow)">
+    <!-- Chef Hat / Logo Graphic -->
+    <path d="M160 32 C115 32 80 65 80 110 C80 116 81 122 83 128 C52 135 30 162 30 196 C30 235 60 268 100 272 L220 272 C260 268 290 235 290 196 C290 162 268 135 237 128 C239 122 240 116 240 110 C240 65 205 32 160 32 Z" fill="url(#cc-chef)"/>
+    <rect x="90" y="280" width="140" height="28" rx="14" fill="#D9A74A"/>
+    <!-- Code brackets </> symbol on hat -->
+    <path d="M130 170 L105 195 L130 220" stroke="#3D2E24" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M190 170 L215 195 L190 220" stroke="#3D2E24" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <line x1="170" y1="165" x2="150" y2="225" stroke="#D9A74A" stroke-width="11" stroke-linecap="round"/>
+  </g>
+</svg>

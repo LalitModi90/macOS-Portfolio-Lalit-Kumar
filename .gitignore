@@ -1,0 +1,14 @@
+*.log
+.DS_Store
+.cache/
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+public/wallpapers/Tahoe Day.mov
+*.timestamp-*.mjs
+vite.config.ts.timestamp-*
+
