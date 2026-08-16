@@ -46,7 +46,12 @@ export default function Mobile(props: MacActions) {
   const isVideoWallpaper = currentBgUrl?.includes('.mp4') || currentBgUrl?.includes('video');
 
   const openApp = (id: string) => {
-    setActiveApp(id);
+    const app = apps.find(a => a.id === id);
+    if (app && app.link && !app.content) {
+      window.open(app.link, "_blank");
+    } else {
+      setActiveApp(id);
+    }
   };
 
   const closeApp = () => {
@@ -150,7 +155,7 @@ export default function Mobile(props: MacActions) {
              <div className="flex-1 px-5 pt-6">
                 <div className="grid grid-cols-4 gap-x-3 gap-y-7">
                   {apps
-                    .filter((app) => app.desktop && !dockApps.includes(app.id) && !["terminal", "vscode", "typora", "siri", "github", "youtube", "spotify"].includes(app.id))
+                    .filter((app) => (app.desktop || ["github", "leetcode", "codechef", "codeyx"].includes(app.id)) && !dockApps.includes(app.id) && app.id !== "vscode")
                     .map((app) => (
                     <div 
                       key={app.id} 
@@ -195,8 +200,22 @@ export default function Mobile(props: MacActions) {
                  })()}
                </div>
 
+               {/* Floating Close Button for Mobile Apps */}
+               <button 
+                 onClick={closeApp}
+                 onTouchEnd={closeApp}
+                 className="absolute top-[60px] right-4 z-50 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-md border border-white/10 active:scale-95 transition-all pointer-events-auto shadow-md text-xs font-bold"
+                 title="Close App"
+               >
+                 ✕
+               </button>
+
                {/* Home Indicator line at the bottom to go back */}
-               <div className="absolute bottom-1 left-0 right-0 h-6 flex items-end justify-center pb-2 cursor-pointer z-50 bg-gradient-to-t from-white/80 dark:from-black/80 to-transparent" onClick={closeApp}>
+               <div 
+                 className="absolute bottom-1 left-0 right-0 h-8 flex items-end justify-center pb-2 cursor-pointer z-50 bg-gradient-to-t from-white/80 dark:from-black/80 to-transparent" 
+                 onClick={closeApp}
+                 onTouchEnd={closeApp}
+               >
                  <div className="w-1/3 h-1.5 bg-black dark:bg-white rounded-full opacity-80 hover:opacity-100 transition-opacity" />
                </div>
              </div>

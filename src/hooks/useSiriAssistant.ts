@@ -273,9 +273,19 @@ export function useSiriAssistant() {
         }
         case "play_music": {
           try {
-            const playPromise = controls.play();
-            if (playPromise && typeof (playPromise as any).catch === "function") {
-              (playPromise as Promise<void>).catch(() => {});
+            if (action.target && typeof action.target === "string") {
+              const searchTerm = action.target.trim();
+              window.dispatchEvent(new CustomEvent("desktop:openApp", { detail: { id: "spotify" } }));
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent("spotify:voiceSearch", { 
+                  detail: { query: searchTerm, playImmediately: true } 
+                }));
+              }, 350);
+            } else {
+              const playPromise = controls.play();
+              if (playPromise && typeof (playPromise as any).catch === "function") {
+                (playPromise as Promise<void>).catch(() => {});
+              }
             }
           } catch { /* empty */ }
           break;

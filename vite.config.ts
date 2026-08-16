@@ -30,6 +30,49 @@ function checkNSFW(text: string): boolean {
   });
 }
 
+function deezerApiPlugin(): Plugin {
+  return {
+    name: "deezer-api-plugin",
+    configureServer(server) {
+      server.middlewares.use("/api/deezer", async (req, res) => {
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+
+        if (req.method === "OPTIONS") {
+          res.statusCode = 200;
+          res.end();
+          return;
+        }
+
+        try {
+          const parsedUrl = URL.parse(req.url || "", true);
+          const query = (parsedUrl.query.q as string) || "";
+
+          if (!query) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: "Missing query parameter 'q'" }));
+            return;
+          }
+
+          const response = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(query)}`);
+          if (!response.ok) {
+            res.statusCode = response.status;
+            res.end(JSON.stringify({ error: `Deezer API responded with status ${response.status}` }));
+            return;
+          }
+
+          const rawData = await response.json();
+          res.statusCode = 200;
+          res.end(JSON.stringify(rawData));
+        } catch (err: any) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: err.message || "Internal server error" }));
+        }
+      });
+    }
+  };
+}
+
 function pixabayApiPlugin(): Plugin {
   return {
     name: "pixabay-api-plugin",
@@ -363,6 +406,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       pixabayApiPlugin(),
+      deezerApiPlugin(),
       assistantApiPlugin(env),
       unocss(),
       react(),

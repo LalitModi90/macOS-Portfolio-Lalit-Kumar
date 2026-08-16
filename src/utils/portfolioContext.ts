@@ -803,6 +803,40 @@ export function resolveLocalIntent(
     };
   }
 
+  // Music search/play voice commands:
+  const isPlayCommand = query.startsWith("play ") && !query.includes("play music");
+  const isSearchCommand = query.startsWith("search ") || query.startsWith("find ") || query.startsWith("search for ");
+
+  if (isPlayCommand || isSearchCommand) {
+    let searchTerm = "";
+    if (query.startsWith("search for ")) {
+      searchTerm = query.replace("search for ", "").trim();
+    } else if (query.startsWith("search ")) {
+      searchTerm = query.replace("search ", "").trim();
+    } else if (query.startsWith("play ")) {
+      searchTerm = query.replace("play ", "").trim();
+    } else if (query.startsWith("find ")) {
+      searchTerm = query.replace("find ", "").trim();
+    }
+
+    if (searchTerm) {
+      const displayTerm = searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1);
+      return {
+        intent: isPlayCommand ? "PLAY_SPECIFIC_MUSIC" : "SEARCH_SPECIFIC_MUSIC",
+        response: gujarati
+          ? `Saras! Spotify par "${displayTerm}" shodhye chhiye ane play kariye chhiye.`
+          : hindi
+          ? `Theek hai! Spotify par "${displayTerm}" search karke play kar rahe hain.`
+          : `Sure! Searching for "${displayTerm}" on Spotify and starting playback.`,
+        action: { 
+          type: "play_music", 
+          target: searchTerm 
+        },
+        modelUsed: "Portfolio AI Core"
+      };
+    }
+  }
+
   if (query.includes("play music") || query.includes("gana bajao") || query.includes("git vagado")) {
     return {
       intent: "PLAY_MUSIC",
