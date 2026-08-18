@@ -11,6 +11,7 @@ export default function Siri({ closeSiri, isMobile = false }: SiriProps) {
   const dark = useStore((state) => state.dark);
   const desktopChatRef = useRef<HTMLDivElement>(null);
   const mobileChatRef = useRef<HTMLDivElement>(null);
+  const [typedInput, setTypedInput] = useState("");
 
   const [isMobileScreen, setIsMobileScreen] = useState(() => {
     if (typeof window !== "undefined") {

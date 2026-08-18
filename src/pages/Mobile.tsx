@@ -98,11 +98,11 @@ export default function Mobile(props: MacActions) {
   const activeWallpaperSet = useStore((s) => s.activeWallpaperSet);
   const activeWallpaper = getWallpaper();
 
-  const defaultMobileBg = dark ? "/wallpapers/mobile-dark.jpg" : "/wallpapers/mobile-light.jpg";
+  const defaultMobileBg = "/wallpapers/gamer-rog.jpg";
   const currentBgUrl =
     customWallpaper
       ? customWallpaper
-      : activeWallpaperSet === "tahoe" || activeWallpaperSet === "ios-mobile"
+      : activeWallpaperSet === "gamer-rog" || activeWallpaperSet === "tahoe"
       ? defaultMobileBg
       : dark
       ? (activeWallpaper.night || defaultMobileBg)

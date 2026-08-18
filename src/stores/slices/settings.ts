@@ -30,11 +30,18 @@ export interface WallpaperSet {
 
 export const wallpaperSets: WallpaperSet[] = [
   {
+    id: "gamer-rog",
+    name: "ROG Gamer Setup (Default)",
+    day: "/wallpapers/gamer-rog.jpg",
+    night: "/wallpapers/gamer-rog.jpg",
+    thumbnail: "/wallpapers/gamer-rog.jpg",
+  },
+  {
     id: "tahoe",
-    name: "macOS Tahoe (Live)",
-    day: "/wallpapers/anime-live-wallpaper (1).mp4",
-    night: "/wallpapers/anime-live-wallpaper (1).mp4",
-    thumbnail: "/wallpapers/anime-live-wallpaper (1).mp4",
+    name: "ROG Gamer Setup",
+    day: "/wallpapers/gamer-rog.jpg",
+    night: "/wallpapers/gamer-rog.jpg",
+    thumbnail: "/wallpapers/gamer-rog.jpg",
   },
   {
     id: "ios-mobile",
@@ -42,6 +49,13 @@ export const wallpaperSets: WallpaperSet[] = [
     day: "/wallpapers/mobile-light.jpg",
     night: "/wallpapers/mobile-dark.jpg",
     thumbnail: "/wallpapers/mobile-dark.jpg",
+  },
+  {
+    id: "tahoe-live",
+    name: "macOS Anime (Live Video)",
+    day: "/wallpapers/anime-live-wallpaper (1).mp4",
+    night: "/wallpapers/anime-live-wallpaper (1).mp4",
+    thumbnail: "/wallpapers/anime-live-wallpaper (1).mp4",
   },
   {
     id: "tahoe-light",
@@ -52,7 +66,7 @@ export const wallpaperSets: WallpaperSet[] = [
   },
   {
     id: "tahoe-beach",
-    name: "Tahoe Dark",
+    name: "Tahoe Space",
     day: "/img/ui/wallpaper-day.jpg",
     night: "/img/ui/wallpaper-night.jpg",
     thumbnail: "/img/ui/wallpaper.jpg",
