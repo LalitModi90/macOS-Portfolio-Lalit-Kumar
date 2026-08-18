@@ -243,53 +243,49 @@ export default function Mobile(props: MacActions) {
         onClose={() => setShowNotificationCenter(false)}
       />
 
-      {/* Home Screen (App Grid + Dock) */}
-      <AnimatePresence>
-        {!activeApp && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 flex flex-col pt-14"
-          >
-              {/* App Grid */}
-             <div className="flex-1 px-5 pt-6">
-                <div className="grid grid-cols-4 gap-x-3 gap-y-7">
-                  {apps
-                    .filter((app) => !dockApps.includes(app.id) && !app.hideOnMobile)
-                    .map((app) => (
-                    <div 
-                      key={app.id} 
-                      className="flex flex-col items-center gap-1.5 cursor-pointer active:opacity-70 transition-opacity" 
-                      onClick={() => openApp(app.id)}
-                    >
-                       <div className="w-[60px] h-[60px] rounded-[14px] overflow-hidden shadow-md flex-shrink-0">
-                         <IOSAppIcon appId={app.id} desktopImg={`/${app.mobileImg || app.img}`} />
-                       </div>
-                       <span className="text-white text-[11px] font-medium tracking-wide drop-shadow-md text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-0.5">
-                         {app.mobileTitle || app.title}
-                       </span>
-                    </div>
-                  ))}
-                </div>
-             </div>
+      {/* Home Screen (App Grid + Dock) — Persistent for instant navigation */}
+      <div 
+        className={`absolute inset-0 flex flex-col pt-14 transition-all duration-300 ease-out ${
+          activeApp ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 pointer-events-auto"
+        }`}
+        style={{ willChange: "opacity, transform" }}
+      >
+        {/* App Grid */}
+        <div className="flex-1 px-5 pt-6 overflow-y-auto no-scrollbar">
+          <div className="grid grid-cols-4 gap-x-3 gap-y-7 touch-manipulation">
+            {apps
+              .filter((app) => !dockApps.includes(app.id) && !app.hideOnMobile)
+              .map((app) => (
+              <div 
+                key={app.id} 
+                className="flex flex-col items-center gap-1.5 cursor-pointer active:scale-95 active:opacity-70 transition-all duration-150 select-none" 
+                onClick={() => openApp(app.id)}
+              >
+                 <div className="w-[60px] h-[60px] rounded-[14px] overflow-hidden shadow-md flex-shrink-0">
+                   <IOSAppIcon appId={app.id} desktopImg={`/${app.mobileImg || app.img}`} />
+                 </div>
+                 <span className="text-white text-[11px] font-medium tracking-wide drop-shadow-md text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-0.5">
+                   {app.mobileTitle || app.title}
+                 </span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-             {/* Dock */}
-             <MobileDock openApp={openApp} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* Dock */}
+        <MobileDock openApp={openApp} />
+      </div>
 
-      {/* Active App Window — Native iOS Layout */}
+      {/* Active App Window — Native iOS GPU-Accelerated Layout */}
       <AnimatePresence>
         {activeApp && (
           <motion.div
             key="activeApp"
-            initial={{ y: "100%", opacity: 0.8 }}
+            initial={{ y: "100%", opacity: 0.9 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "100%", opacity: 0.8 }}
-            transition={{ type: "spring", damping: 28, stiffness: 260 }}
+            exit={{ y: "100%", opacity: 0.9 }}
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
             className="absolute inset-0 z-40 bg-[#121318] text-white flex flex-col overflow-hidden"
           >
             {/* Top iOS Navigation Bar (Dark glass backdrop for status bar contrast) */}

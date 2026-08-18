@@ -25,7 +25,7 @@ export default function MobileDock({ openApp }: { openApp: (id: string) => void 
           return (
             <div 
               key={id} 
-              className="flex flex-col items-center justify-center cursor-pointer active:opacity-70 transition-opacity"
+              className="flex flex-col items-center justify-center cursor-pointer active:scale-90 active:opacity-70 transition-all duration-150 select-none touch-manipulation"
               onClick={() => openApp(id)}
             >
               <div className="w-[58px] h-[58px] rounded-[13px] overflow-hidden shadow-md flex-shrink-0">
