@@ -94,9 +94,21 @@ export default function Mobile(props: MacActions) {
     setBrightness(value);
   };
 
+  const customWallpaper = useStore((s) => s.customWallpaper);
+  const activeWallpaperSet = useStore((s) => s.activeWallpaperSet);
   const activeWallpaper = getWallpaper();
-  const currentBgUrl = dark ? activeWallpaper.night : activeWallpaper.day;
-  const isVideoWallpaper = currentBgUrl?.includes('.mp4') || currentBgUrl?.includes('video');
+
+  const defaultMobileBg = dark ? "/wallpapers/mobile-dark.jpg" : "/wallpapers/mobile-light.jpg";
+  const currentBgUrl =
+    customWallpaper
+      ? customWallpaper
+      : activeWallpaperSet === "tahoe" || activeWallpaperSet === "ios-mobile"
+      ? defaultMobileBg
+      : dark
+      ? (activeWallpaper.night || defaultMobileBg)
+      : (activeWallpaper.day || defaultMobileBg);
+
+  const isVideoWallpaper = currentBgUrl?.includes(".mp4") || currentBgUrl?.includes("video");
 
   const openApp = (id: string) => {
     const app = apps.find(a => a.id === id);
@@ -146,6 +158,7 @@ export default function Mobile(props: MacActions) {
 
   const bgStyle: React.CSSProperties = {
     backgroundImage: isVideoWallpaper ? "none" : `url(${currentBgUrl})`,
+    backgroundColor: "#0d0f14",
     backgroundSize: "cover",
     backgroundPosition: "center",
     filter: `brightness(${(brightness as number) * 0.7 + 50}%)`,
@@ -161,7 +174,7 @@ export default function Mobile(props: MacActions) {
     <div className="size-full overflow-hidden relative" style={bgStyle}>
       {isVideoWallpaper && (
         <video
-          className="absolute inset-0 w-full h-full object-cover -z-10"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
           src={currentBgUrl}
           autoPlay
           loop
