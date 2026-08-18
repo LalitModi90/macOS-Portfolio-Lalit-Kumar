@@ -12,6 +12,7 @@ import { FolderIcon, FolderHomeIcon, FolderDockIcon, PdfIcon } from "~/component
 import { AnimatePresence, motion } from "framer-motion";
 import { useWindowSize } from "~/hooks";
 import SiriVoiceAssistant from "~/components/SiriVoiceAssistant";
+import Siri from "~/components/apps/Siri";
 
 interface DesktopState {
   showApps: { [key: string]: boolean };
@@ -237,18 +238,7 @@ export default function Desktop(props: MacActions) {
     return apps.map((app) => {
       if (!app.desktop) return null;
 
-      if (app.id === "siri" && state.showApps[app.id]) {
-        return (
-          <div
-            key={`desktop-app-${app.id}`}
-            className="fixed top-8 right-4 z-[1000] drop-shadow-2xl flex items-start justify-end"
-          >
-            {React.cloneElement(app.content as React.ReactElement, {
-              closeSiri: () => closeApp("siri"),
-            })}
-          </div>
-        );
-      }
+      if (app.id === "siri") return null;
 
       if (!app.content) return null;
 
@@ -443,6 +433,23 @@ export default function Desktop(props: MacActions) {
         onClose={() => setContextMenu({ ...contextMenu, show: false })}
         openApp={openApp}
       />
+
+      {/* Siri Desktop Floating Card Overlay */}
+      <AnimatePresence>
+        {state.showApps["siri"] && (
+          <motion.div
+            key="desktop-siri-overlay"
+            initial={{ opacity: 0, y: -12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-9 right-4 z-[9990] drop-shadow-2xl pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Siri closeSiri={() => closeApp("siri")} isMobile={false} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Global Siri Hands-free Voice Assistant */}
       <SiriVoiceAssistant

@@ -9,8 +9,8 @@ interface SiriProps {
 
 export default function Siri({ closeSiri, isMobile = false }: SiriProps) {
   const dark = useStore((state) => state.dark);
-  const [typedInput, setTypedInput] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const desktopChatRef = useRef<HTMLDivElement>(null);
+  const mobileChatRef = useRef<HTMLDivElement>(null);
 
   const [isMobileScreen, setIsMobileScreen] = useState(() => {
     if (typeof window !== "undefined") {
@@ -51,9 +51,14 @@ export default function Siri({ closeSiri, isMobile = false }: SiriProps) {
     }
   }, [startListening]);
 
-  // Scroll to bottom of message list whenever response, transcript or history changes
+  // Scroll ONLY the chat message container (never window or parent body)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (desktopChatRef.current) {
+      desktopChatRef.current.scrollTop = desktopChatRef.current.scrollHeight;
+    }
+    if (mobileChatRef.current) {
+      mobileChatRef.current.scrollTop = mobileChatRef.current.scrollHeight;
+    }
   }, [response, transcript, history, phase]);
 
   // Handle manual orb click
@@ -213,7 +218,7 @@ export default function Siri({ closeSiri, isMobile = false }: SiriProps) {
         </div>
 
         {/* Middle Section: Conversation History & Spoken Text Stream */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-1 py-2 space-y-3 scroll-smooth">
+        <div ref={mobileChatRef} className="flex-1 min-h-0 overflow-y-auto px-1 py-2 space-y-3 scroll-smooth">
           {history.length === 0 && !response && !transcript && (
             <div className="flex flex-col items-center justify-center h-full text-center px-4 py-6">
               <p className="text-[16px] font-medium text-white/90 mb-1">Hi! How can I help you?</p>
@@ -276,8 +281,6 @@ export default function Siri({ closeSiri, isMobile = false }: SiriProps) {
               <span>Thinking…</span>
             </div>
           )}
-
-          <div ref={messagesEndRef} />
         </div>
 
         {/* Bottom Section: Quick Prompts + Input + Voice Bar */}
@@ -360,7 +363,7 @@ export default function Siri({ closeSiri, isMobile = false }: SiriProps) {
   // DESKTOP VIEW: macOS Floating Siri Widget Layout
   // -------------------------------------------------------------
   return (
-    <div className="flex flex-col sm:flex-row items-end sm:items-start justify-end gap-3.5 relative pointer-events-auto mt-3 mr-3 select-none">
+    <div className="flex flex-col sm:flex-row items-end sm:items-start justify-end gap-3.5 relative pointer-events-auto select-none">
       <audio id="siri-audio" src="/music/siri.mp3" preload="auto" className="hidden" />
       {visualizerStyles}
 
@@ -441,7 +444,7 @@ export default function Siri({ closeSiri, isMobile = false }: SiriProps) {
         </div>
 
         {/* Response / Transcript Area */}
-        <div className="py-2 flex flex-col gap-2 min-h-[60px] max-h-[220px] overflow-y-auto">
+        <div ref={desktopChatRef} className="py-2 flex flex-col gap-2 min-h-[60px] max-h-[220px] overflow-y-auto scroll-smooth">
           {transcript && (
             <div className="text-[11.5px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2.5 py-1.5 rounded-lg">
               <span className="opacity-60">You:</span> "{transcript}"
@@ -459,7 +462,6 @@ export default function Siri({ closeSiri, isMobile = false }: SiriProps) {
               </span>
             ))}
           </div>
-          <div ref={messagesEndRef} />
         </div>
 
         {/* Quick Prompts */}
